@@ -18,14 +18,17 @@ export function useApplications() {
   const fetchApps = async () => {
     setIsLoading(true);
     try {
-      // Use Supabase to fetch applications data directly
+      console.log("Fetching applications from Supabase...");
       const { data, error } = await supabase
         .from('applications')
         .select('*');
       
       if (error) {
+        console.error("Supabase error:", error);
         throw error;
       }
+      
+      console.log("Received data from Supabase:", data);
       
       // Convert Supabase applications data to our Application type
       const formattedApps: Application[] = data.map(app => ({
@@ -44,6 +47,7 @@ export function useApplications() {
         updated_at: app.updated_at || new Date().toISOString()
       }));
       
+      console.log("Formatted applications:", formattedApps);
       setApplications(formattedApps);
     } catch (error) {
       console.error("Failed to fetch applications:", error);
@@ -55,22 +59,42 @@ export function useApplications() {
 
   const handleCreateApplication = async (data: ApplicationFormValues) => {
     try {
-      // Get the API domain from localStorage - this comes from Configuration page
-      const apiDomain = localStorage.getItem("apiDomain");
+      // First create the application in Supabase directly
+      const { error: supabaseError } = await supabase.from('applications').insert([{
+        name: data.name,
+        callback_url: data.callback_url,
+        consumer_key: data.consumer_key,
+        consumer_secret: data.consumer_secret,
+        business_short_code: data.business_short_code,
+        passkey: data.passkey,
+        bearer_token: data.bearer_token,
+        party_a: data.party_a,
+        party_b: data.party_b,
+        app_id: data.consumer_key, // Using consumer_key as app_id for demonstration
+        app_secret: data.consumer_secret, // Using consumer_secret as app_secret for demonstration
+      }]);
       
-      if (!apiDomain) {
-        toast.error("API domain not configured. Please set it in Configuration.");
+      if (supabaseError) {
+        console.error("Supabase insert error:", supabaseError);
+        toast.error(`Failed to register application in database: ${supabaseError.message}`);
         return false;
       }
+
+      // Additionally, try to register with the API if apiDomain is configured
+      const apiDomain = localStorage.getItem("apiDomain");
+      if (apiDomain) {
+        try {
+          apiClient.setBaseUrl(apiDomain);
+          await createApplication(data);
+          toast.success("Application registered successfully with API");
+        } catch (apiError) {
+          console.warn("API registration failed, but database insert succeeded:", apiError);
+          // Don't return false here as the Supabase insert succeeded
+        }
+      }
       
-      // Set the API domain for the request
-      apiClient.setBaseUrl(apiDomain);
-      
-      // Call the external API endpoint for registration
-      const newApp = await createApplication(data);
-      
-      // After successful registration, refresh the list to get latest data
-      fetchApps();
+      // Refresh the applications list
+      await fetchApps();
       
       setIsDialogOpen(false);
       toast.success("Application registered successfully");
@@ -86,22 +110,43 @@ export function useApplications() {
     if (!editingApp) return false;
     
     try {
-      // Get the API domain from localStorage
-      const apiDomain = localStorage.getItem("apiDomain");
+      // Update the application in Supabase directly
+      const { error: supabaseError } = await supabase
+        .from('applications')
+        .update({
+          name: data.name,
+          callback_url: data.callback_url,
+          consumer_key: data.consumer_key,
+          consumer_secret: data.consumer_secret,
+          business_short_code: data.business_short_code,
+          passkey: data.passkey,
+          bearer_token: data.bearer_token,
+          party_a: data.party_a,
+          party_b: data.party_b,
+        })
+        .eq('id', editingApp.id);
       
-      if (!apiDomain) {
-        toast.error("API domain not configured. Please set it in Configuration.");
+      if (supabaseError) {
+        console.error("Supabase update error:", supabaseError);
+        toast.error(`Failed to update application in database: ${supabaseError.message}`);
         return false;
       }
+
+      // Additionally, try to update with the API if apiDomain is configured
+      const apiDomain = localStorage.getItem("apiDomain");
+      if (apiDomain) {
+        try {
+          apiClient.setBaseUrl(apiDomain);
+          await updateApplication(editingApp.id, data);
+          toast.success("Application updated successfully with API");
+        } catch (apiError) {
+          console.warn("API update failed, but database update succeeded:", apiError);
+          // Don't return false here as the Supabase update succeeded
+        }
+      }
       
-      // Set the API domain for the request
-      apiClient.setBaseUrl(apiDomain);
-      
-      // Call the external API endpoint for updating
-      await updateApplication(editingApp.id, data);
-      
-      // Refresh the list to get latest data
-      fetchApps();
+      // Refresh the applications list
+      await fetchApps();
       
       setEditingApp(null);
       toast.success("Application updated successfully");
@@ -117,22 +162,33 @@ export function useApplications() {
     if (!selectedAppId) return false;
     
     try {
-      // Get the API domain from localStorage
-      const apiDomain = localStorage.getItem("apiDomain");
+      // Update the status in Supabase directly
+      const { error: supabaseError } = await supabase
+        .from('applications')
+        .update({ is_active: newStatus })
+        .eq('id', selectedAppId);
       
-      if (!apiDomain) {
-        toast.error("API domain not configured. Please set it in Configuration.");
+      if (supabaseError) {
+        console.error("Supabase status update error:", supabaseError);
+        toast.error(`Failed to update application status in database: ${supabaseError.message}`);
         return false;
       }
+
+      // Additionally, try to update status with the API if apiDomain is configured
+      const apiDomain = localStorage.getItem("apiDomain");
+      if (apiDomain) {
+        try {
+          apiClient.setBaseUrl(apiDomain);
+          await toggleApplicationStatus(selectedAppId, newStatus);
+          toast.success(`Application ${newStatus ? 'activated' : 'deactivated'} successfully with API`);
+        } catch (apiError) {
+          console.warn("API status update failed, but database update succeeded:", apiError);
+          // Don't return false here as the Supabase update succeeded
+        }
+      }
       
-      // Set the API domain for the request
-      apiClient.setBaseUrl(apiDomain);
-      
-      // Call the external API endpoint for status toggle
-      await toggleApplicationStatus(selectedAppId, newStatus);
-      
-      // Refresh the list to get latest data
-      fetchApps();
+      // Refresh the applications list
+      await fetchApps();
       
       setIsStatusDialogOpen(false);
       toast.success(`Application ${newStatus ? 'activated' : 'deactivated'} successfully`);
