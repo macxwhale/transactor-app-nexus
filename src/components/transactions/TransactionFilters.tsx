@@ -42,7 +42,7 @@ export function TransactionFilters({
         <Select
           value={filters.status}
           onValueChange={(value) => {
-            onFilterChange({ ...filters, status: value });
+            onFilterChange({ ...filters, status: value === "all" ? "" : value });
           }}
         >
           <SelectTrigger>
@@ -50,9 +50,9 @@ export function TransactionFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="failed">Failed</SelectItem>
+            <SelectItem value="Completed">Completed</SelectItem>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Failed">Failed</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -61,7 +61,7 @@ export function TransactionFilters({
         <Select
           value={filters.applicationId}
           onValueChange={(value) => {
-            onFilterChange({ ...filters, applicationId: value });
+            onFilterChange({ ...filters, applicationId: value === "all" ? "" : value });
           }}
         >
           <SelectTrigger>

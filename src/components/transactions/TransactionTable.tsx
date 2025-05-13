@@ -14,6 +14,7 @@ import { Download, RefreshCcw } from "lucide-react";
 import { TransactionFilters } from "./TransactionFilters";
 import { getTransactionColumns } from "./TransactionColumns";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -49,9 +50,77 @@ export function TransactionTable({
 }: TransactionTableProps) {
   const columns = getTransactionColumns(onViewDetails);
 
-  const handleExport = () => {
-    toast.success("Export started. Your file will be ready for download shortly.");
-    // In a real app, this would trigger an API call to generate and download a report
+  const handleExport = async () => {
+    toast.loading("Preparing export...");
+    
+    try {
+      // Build query with the same filters as the table
+      let query = supabase.from('transactions').select('*');
+      
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+      
+      if (filters.applicationId) {
+        query = query.eq('app_id', filters.applicationId);
+      }
+      
+      if (filters.startDate) {
+        const startDate = new Date(filters.startDate).getTime();
+        query = query.gte('transaction_date', startDate);
+      }
+      
+      if (filters.endDate) {
+        const endDate = new Date(filters.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        query = query.lte('transaction_date', endDate.getTime());
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        toast.dismiss();
+        toast.error("No data to export");
+        return;
+      }
+      
+      // Transform data for CSV
+      const csvData = data.map(tx => ({
+        Receipt: tx.mpesa_receipt_number || '',
+        Phone: tx.phone_number,
+        Amount: tx.amount,
+        Status: tx.status,
+        Date: new Date(tx.transaction_date).toLocaleDateString(),
+        Application: applications.find(app => app.id === tx.app_id)?.name || tx.app_id,
+        Reference: tx.account_reference,
+        Description: tx.transaction_desc
+      }));
+      
+      // Convert to CSV
+      const headers = Object.keys(csvData[0]).join(',');
+      const rows = csvData.map(row => Object.values(row).join(','));
+      const csv = [headers, ...rows].join('\n');
+      
+      // Create and download file
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `transactions-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.dismiss();
+      toast.success("Export completed successfully");
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.dismiss();
+      toast.error("Export failed. Please try again.");
+    }
   };
 
   return (
@@ -79,6 +148,7 @@ export function TransactionTable({
             size="sm"
             className="gap-1"
             onClick={handleExport}
+            disabled={isLoading}
           >
             <Download className="h-4 w-4" />
             Export
