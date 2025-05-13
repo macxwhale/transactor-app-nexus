@@ -2,7 +2,8 @@
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
 import { apiClient, createApplication, updateApplication, toggleApplicationStatus } from "@/lib/api";
 
-export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any }> {
+// Update return types to include alreadySaved property
+export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any; alreadySaved?: boolean }> {
   const apiDomain = localStorage.getItem("apiDomain");
   if (!apiDomain) {
     console.log("No API domain configured");
@@ -14,7 +15,7 @@ export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{
     apiClient.setBaseUrl(apiDomain);
     const apiResponse = await createApplication(data);
     console.log("API registration response:", apiResponse);
-    return { success: true, apiResponse };
+    return { success: true, apiResponse, alreadySaved: false };
   } catch (error) {
     console.error("API registration failed:", error);
     return { success: false };
@@ -55,7 +56,7 @@ export async function registerAppWithEdgeFunction(data: ApplicationFormValues): 
   }
 }
 
-export async function updateAppWithAPI(id: string, data: ApplicationFormValues): Promise<{ success: boolean }> {
+export async function updateAppWithAPI(id: string, data: ApplicationFormValues): Promise<{ success: boolean; alreadySaved?: boolean }> {
   const apiDomain = localStorage.getItem("apiDomain");
   if (!apiDomain) {
     return { success: false };
@@ -64,7 +65,7 @@ export async function updateAppWithAPI(id: string, data: ApplicationFormValues):
   try {
     apiClient.setBaseUrl(apiDomain);
     await updateApplication(id, data);
-    return { success: true };
+    return { success: true, alreadySaved: false };
   } catch (error) {
     console.warn("API update failed:", error);
     return { success: false };

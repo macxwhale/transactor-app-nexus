@@ -47,7 +47,8 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
         
         // Early return if Edge Function succeeded and already saved to DB
         if (registrationResult.success) {
-          if (registrationResult.alreadySaved) {
+          // Safely check if alreadySaved property exists and is true
+          if (registrationResult.alreadySaved === true) {
             console.log("Edge Function has already saved the application to database");
             await fetchApps();
             setIsDialogOpen(false);

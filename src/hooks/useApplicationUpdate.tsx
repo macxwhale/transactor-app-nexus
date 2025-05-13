@@ -28,7 +28,8 @@ export function useApplicationUpdate(fetchApps: () => Promise<void>) {
         
         // If Edge Function update succeeded and already saved to DB
         if (updateResult.success) {
-          if (updateResult.alreadySaved) {
+          // Safely check if alreadySaved property exists and is true
+          if (updateResult.alreadySaved === true) {
             console.log("Edge Function has already updated the application in database");
             await fetchApps();
             setEditingApp(null);
