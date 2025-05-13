@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { toast } from "sonner";
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
@@ -10,8 +9,12 @@ import { saveApplicationToSupabase } from "@/services/applicationSupabaseService
 
 export function useApplicationCreate(fetchApps: () => Promise<void>) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateApplication = async (data: ApplicationFormValues) => {
+    if (isSubmitting) return false; // Prevent multiple submissions
+    
+    setIsSubmitting(true);
     try {
       console.log("Creating application with data:", data);
       
@@ -22,35 +25,48 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
       if (!registrationResult.success) {
         console.log("Direct API registration failed, trying Edge Function");
         registrationResult = await registerAppWithEdgeFunction(data);
+        
+        // Early return if Edge Function succeeded
+        if (registrationResult.success) {
+          const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
+          if (success) {
+            await fetchApps();
+            setIsDialogOpen(false);
+            toast.success("Application registered via Edge Function!");
+            return true;
+          }
+          return false;
+        }
       }
       
+      // Handle API success case
       if (registrationResult.success && registrationResult.apiResponse) {
-        // If either API or Edge Function was successful, save to Supabase
         const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
         if (!success) {
           return false;
         }
-      } else {
-        toast.error("Failed to register application with both direct API and Edge Function");
-        return false;
+        
+        await fetchApps();
+        setIsDialogOpen(false);
+        toast.success("Application registered successfully");
+        return true;
       }
       
-      // Refresh the applications list
-      await fetchApps();
-      
-      setIsDialogOpen(false);
-      toast.success("Application registered successfully");
-      return true;
+      toast.error("Failed to register application with both direct API and Edge Function");
+      return false;
     } catch (error) {
       console.error("Failed to register application:", error);
       toast.error("Failed to register application");
       return false;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return {
     isDialogOpen,
     setIsDialogOpen,
-    handleCreateApplication
+    handleCreateApplication,
+    isSubmitting // Expose this to disable form buttons
   };
 }
