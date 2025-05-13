@@ -28,13 +28,15 @@ export function useApplications() {
   const { 
     isDialogOpen, 
     setIsDialogOpen, 
-    handleCreateApplication 
+    handleCreateApplication,
+    isSubmitting: isCreateSubmitting
   } = useApplicationCreate(fetchApps);
   
   const { 
     editingApp, 
     setEditingApp, 
-    handleUpdateApplication 
+    handleUpdateApplication,
+    isSubmitting: isUpdateSubmitting
   } = useApplicationUpdate(fetchApps);
   
   const { 
@@ -45,6 +47,9 @@ export function useApplications() {
     handleToggleStatus,
     openStatusDialog
   } = useApplicationToggle(fetchApps);
+
+  // Combine submission states
+  const isSubmitting = isCreateSubmitting || isUpdateSubmitting;
 
   // Fetch applications on component mount
   useEffect(() => {
@@ -68,6 +73,7 @@ export function useApplications() {
     handleCreateApplication,
     handleUpdateApplication,
     handleToggleStatus,
-    openStatusDialog
+    openStatusDialog,
+    isSubmitting
   };
 }

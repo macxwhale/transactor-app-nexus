@@ -39,7 +39,8 @@ const Applications = () => {
     handleCreateApplication,
     handleUpdateApplication,
     handleToggleStatus,
-    openStatusDialog
+    openStatusDialog,
+    isSubmitting
   } = useApplications();
 
   const columns = getApplicationColumns({
@@ -81,7 +82,10 @@ const Applications = () => {
                   )}
                 </DialogDescription>
               </DialogHeader>
-              <ApplicationForm onSubmit={handleCreateApplication} />
+              <ApplicationForm 
+                onSubmit={handleCreateApplication} 
+                isSubmitting={isSubmitting}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -122,6 +126,7 @@ const Applications = () => {
               onSubmit={handleUpdateApplication}
               defaultValues={editingApp}
               isEditing
+              isSubmitting={isSubmitting}
             />
           </DialogContent>
         </Dialog>

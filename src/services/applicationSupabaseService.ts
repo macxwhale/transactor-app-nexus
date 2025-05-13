@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Application } from "@/lib/api";
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
@@ -49,11 +48,42 @@ export async function fetchApplicationsFromSupabase(): Promise<Application[]> {
   }
 }
 
+// New function to check if an application with the given name already exists
+export async function checkApplicationExists(name: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('applications')
+      .select('id')
+      .eq('name', name)
+      .maybeSingle();
+    
+    if (error) {
+      console.error("Error checking for existing application:", error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error("Failed to check for existing application:", error);
+    return false;
+  }
+}
+
 export async function saveApplicationToSupabase(
   apiResponse: any, 
   data: ApplicationFormValues
 ): Promise<boolean> {
   try {
+    // Check if application already exists (double check for race conditions)
+    const exists = await checkApplicationExists(data.name);
+    
+    if (exists) {
+      console.log("Application already exists in database, preventing duplicate insert");
+      toast.error(`Application "${data.name}" already exists in the database`);
+      return false;
+    }
+
+    // Proceed with insert if the application doesn't exist
     const { error } = await supabase.from('applications').insert([{
       name: data.name,
       callback_url: data.callback_url,
@@ -70,8 +100,14 @@ export async function saveApplicationToSupabase(
     }]);
     
     if (error) {
-      console.error("Supabase insert error after registration:", error);
-      toast.error(`Failed to register application in database: ${error.message}`);
+      // Handle specific error types
+      if (error.code === '23505') { // PostgreSQL unique violation error code
+        console.error("Duplicate application detected:", error);
+        toast.error(`Application with name "${data.name}" already exists`);
+      } else {
+        console.error("Supabase insert error after registration:", error);
+        toast.error(`Failed to register application in database: ${error.message}`);
+      }
       return false;
     }
     

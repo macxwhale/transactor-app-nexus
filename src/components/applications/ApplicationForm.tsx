@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 // Update schema to reflect that app_id and app_secret are not part of the form
 const applicationSchema = z.object({
@@ -34,12 +35,14 @@ interface ApplicationFormProps {
   onSubmit: (data: ApplicationFormValues) => void;
   defaultValues?: Partial<ApplicationFormValues>;
   isEditing?: boolean;
+  isSubmitting?: boolean;
 }
 
 const ApplicationForm = ({
   onSubmit,
   defaultValues,
   isEditing = false,
+  isSubmitting = false,
 }: ApplicationFormProps) => {
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationSchema),
@@ -56,9 +59,17 @@ const ApplicationForm = ({
     },
   });
 
+  // Function to handle form submission
+  const handleSubmit = (data: ApplicationFormValues) => {
+    // Only submit if not already submitting
+    if (!isSubmitting) {
+      onSubmit(data);
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -67,7 +78,7 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>App Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="My App" {...field} />
+                  <Input placeholder="My App" {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -80,7 +91,11 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>Callback URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://example.com/callback" {...field} />
+                  <Input 
+                    placeholder="https://example.com/callback" 
+                    {...field} 
+                    disabled={isSubmitting}
+                  />
                 </FormControl>
                 <FormDescription>Must start with https://</FormDescription>
                 <FormMessage />
@@ -97,7 +112,7 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>Consumer Key</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -110,7 +125,7 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>Consumer Secret</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -126,7 +141,7 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>Business Short Code</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -139,7 +154,7 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>Passkey</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -155,7 +170,7 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>Bearer Token</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -171,7 +186,7 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>Party A</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -184,7 +199,7 @@ const ApplicationForm = ({
               <FormItem>
                 <FormLabel>Party B</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -192,8 +207,15 @@ const ApplicationForm = ({
           />
         </div>
 
-        <Button type="submit" className="w-full">
-          {isEditing ? "Update Application" : "Register Application"}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {isEditing ? "Updating..." : "Registering..."}
+            </>
+          ) : (
+            isEditing ? "Update Application" : "Register Application"
+          )}
         </Button>
       </form>
     </Form>
