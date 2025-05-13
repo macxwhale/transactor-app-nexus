@@ -85,7 +85,7 @@ export const apiClient = new ApiClient();
 
 // Types
 export interface Application {
-  id: string; // Changed from number to string
+  id: string;
   name: string;
   callback_url: string;
   consumer_key: string;
@@ -101,13 +101,13 @@ export interface Application {
 }
 
 export interface Transaction {
-  id: string; // Changed from number to string
+  id: string;
   mpesa_receipt_number: string;
   phone_number: string;
   amount: number;
   status: 'pending' | 'completed' | 'failed';
   transaction_date: string;
-  application_id: string; // Changed from number to string
+  application_id: string;
   application_name?: string;
   created_at: string;
   updated_at: string;
@@ -134,7 +134,7 @@ export async function fetchApplications(): Promise<Application[]> {
   return response.data;
 }
 
-export async function fetchApplication(id: number): Promise<Application> {
+export async function fetchApplication(id: string): Promise<Application> {
   const response = await apiClient.get<ApiResponse<Application>>(`applications/${id}`);
   return response.data;
 }
@@ -144,12 +144,12 @@ export async function createApplication(data: Partial<Application>): Promise<App
   return response.data;
 }
 
-export async function updateApplication(id: number, data: Partial<Application>): Promise<Application> {
+export async function updateApplication(id: string, data: Partial<Application>): Promise<Application> {
   const response = await apiClient.put<ApiResponse<Application>>(`applications/${id}`, data);
   return response.data;
 }
 
-export async function toggleApplicationStatus(id: number, isActive: boolean): Promise<Application> {
+export async function toggleApplicationStatus(id: string, isActive: boolean): Promise<Application> {
   const response = await apiClient.put<ApiResponse<Application>>(`applications/${id}/toggle-status`, { is_active: isActive });
   return response.data;
 }
@@ -161,7 +161,7 @@ export async function fetchTransactions(
     startDate?: string;
     endDate?: string;
     status?: string;
-    applicationId?: number;
+    applicationId?: string;
   } = {}
 ): Promise<PaginatedResponse<Transaction>> {
   // Build query params
@@ -172,7 +172,7 @@ export async function fetchTransactions(
   if (filters.startDate) params.append('start_date', filters.startDate);
   if (filters.endDate) params.append('end_date', filters.endDate);
   if (filters.status) params.append('status', filters.status);
-  if (filters.applicationId) params.append('application_id', filters.applicationId.toString());
+  if (filters.applicationId) params.append('application_id', filters.applicationId);
 
   const endpoint = `transactions?${params.toString()}`;
   const response = await apiClient.get<ApiResponse<PaginatedResponse<Transaction>>>(endpoint);
