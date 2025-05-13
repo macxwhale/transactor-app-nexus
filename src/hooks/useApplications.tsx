@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Application } from "@/lib/api";
+import { Application, apiClient, createApplication, updateApplication, toggleApplicationStatus } from "@/lib/api";
 import { toast } from "sonner";
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
 
@@ -47,9 +47,7 @@ export function useApplications() {
       setApplications(formattedApps);
     } catch (error) {
       console.error("Failed to fetch applications:", error);
-      // Fallback to mock data if there's an error
-      const mockData = generateMockApplications();
-      setApplications(mockData);
+      toast.error("Failed to fetch applications");
     } finally {
       setIsLoading(false);
     }
@@ -57,52 +55,28 @@ export function useApplications() {
 
   const handleCreateApplication = async (data: ApplicationFormValues) => {
     try {
-      // Insert new application into Supabase
-      const { data: createdApp, error } = await supabase
-        .from('applications')
-        .insert([
-          {
-            name: data.name,
-            callback_url: data.callback_url,
-            consumer_key: data.consumer_key,
-            consumer_secret: data.consumer_secret,
-            business_short_code: data.business_short_code,
-            passkey: data.passkey,
-            bearer_token: data.bearer_token,
-            party_a: data.party_a,
-            party_b: data.party_b,
-            is_active: true,
-            app_id: Math.random().toString(36).substring(2, 15),
-            app_secret: Math.random().toString(36).substring(2, 15)
-          }
-        ])
-        .select()
-        .single();
+      // Get the API domain from localStorage - this comes from Configuration page
+      const apiDomain = localStorage.getItem("apiDomain");
       
-      if (error) {
-        throw error;
+      if (!apiDomain) {
+        toast.error("API domain not configured. Please set it in Configuration.");
+        return false;
       }
       
-      // Format the created app to match our Application type
-      const newApp: Application = {
-        id: createdApp.id,
-        name: createdApp.name,
-        callback_url: createdApp.callback_url || '',
-        consumer_key: createdApp.consumer_key,
-        consumer_secret: createdApp.consumer_secret,
-        business_short_code: createdApp.business_short_code,
-        passkey: createdApp.passkey,
-        bearer_token: createdApp.bearer_token || '',
-        party_a: createdApp.party_a,
-        party_b: createdApp.party_b,
-        is_active: createdApp.is_active ?? true,
-        created_at: createdApp.created_at || new Date().toISOString(),
-        updated_at: createdApp.updated_at || new Date().toISOString()
-      };
+      // Set the API domain for the request
+      apiClient.setBaseUrl(apiDomain);
       
+      // Call the external API endpoint for registration
+      const newApp = await createApplication(data);
+      
+      // After successful registration, update the local list
       setApplications([...applications, newApp]);
       setIsDialogOpen(false);
       toast.success("Application registered successfully");
+      
+      // Refresh the list from the database to ensure all fields are present
+      fetchApps();
+      
       return true;
     } catch (error) {
       console.error("Failed to register application:", error);
@@ -115,51 +89,31 @@ export function useApplications() {
     if (!editingApp) return false;
     
     try {
-      // Update application in Supabase
-      const { data: updatedApp, error } = await supabase
-        .from('applications')
-        .update({
-          name: data.name,
-          callback_url: data.callback_url,
-          consumer_key: data.consumer_key,
-          consumer_secret: data.consumer_secret,
-          business_short_code: data.business_short_code,
-          passkey: data.passkey,
-          bearer_token: data.bearer_token,
-          party_a: data.party_a,
-          party_b: data.party_b,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingApp.id)
-        .select()
-        .single();
+      // Get the API domain from localStorage
+      const apiDomain = localStorage.getItem("apiDomain");
       
-      if (error) {
-        throw error;
+      if (!apiDomain) {
+        toast.error("API domain not configured. Please set it in Configuration.");
+        return false;
       }
       
-      // Format the updated app to match our Application type
-      const formattedApp: Application = {
-        id: updatedApp.id,
-        name: updatedApp.name,
-        callback_url: updatedApp.callback_url || '',
-        consumer_key: updatedApp.consumer_key,
-        consumer_secret: updatedApp.consumer_secret,
-        business_short_code: updatedApp.business_short_code,
-        passkey: updatedApp.passkey,
-        bearer_token: updatedApp.bearer_token || '',
-        party_a: updatedApp.party_a,
-        party_b: updatedApp.party_b,
-        is_active: updatedApp.is_active ?? true,
-        created_at: updatedApp.created_at || new Date().toISOString(),
-        updated_at: updatedApp.updated_at || new Date().toISOString()
-      };
+      // Set the API domain for the request
+      apiClient.setBaseUrl(apiDomain);
       
+      // Call the external API endpoint for updating
+      const updatedApp = await updateApplication(editingApp.id, data);
+      
+      // Update the local list
       setApplications(applications.map(app => 
-        app.id === editingApp.id ? formattedApp : app
+        app.id === editingApp.id ? updatedApp : app
       ));
+      
       setEditingApp(null);
       toast.success("Application updated successfully");
+      
+      // Refresh from database to ensure all fields are present
+      fetchApps();
+      
       return true;
     } catch (error) {
       console.error("Failed to update application:", error);
@@ -172,27 +126,28 @@ export function useApplications() {
     if (!selectedAppId) return false;
     
     try {
-      // Update application status in Supabase
-      const { error } = await supabase
-        .from('applications')
-        .update({
-          is_active: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', selectedAppId);
+      // Get the API domain from localStorage
+      const apiDomain = localStorage.getItem("apiDomain");
       
-      if (error) {
-        throw error;
+      if (!apiDomain) {
+        toast.error("API domain not configured. Please set it in Configuration.");
+        return false;
       }
       
+      // Set the API domain for the request
+      apiClient.setBaseUrl(apiDomain);
+      
+      // Call the external API endpoint for status toggle
+      const updatedApp = await toggleApplicationStatus(selectedAppId, newStatus);
+      
+      // Update the local list
       setApplications(applications.map(app => 
-        app.id === selectedAppId 
-          ? { ...app, is_active: newStatus, updated_at: new Date().toISOString() } 
-          : app
+        app.id === selectedAppId ? updatedApp : app
       ));
       
       setIsStatusDialogOpen(false);
       toast.success(`Application ${newStatus ? 'activated' : 'deactivated'} successfully`);
+      
       return true;
     } catch (error) {
       console.error("Failed to toggle application status:", error);
@@ -210,27 +165,6 @@ export function useApplications() {
   useEffect(() => {
     fetchApps();
   }, []);
-
-  // Function to generate mock applications if needed
-  const generateMockApplications = (): Application[] => {
-    return Array(5)
-      .fill(null)
-      .map((_, index) => ({
-        id: `mock-${index + 1}`,
-        name: `Mock App ${index + 1}`,
-        callback_url: `https://example.com/callback/${index + 1}`,
-        consumer_key: `consumer_key_${index + 1}`,
-        consumer_secret: `consumer_secret_${index + 1}`,
-        business_short_code: `${100000 + index}`,
-        passkey: `passkey_${index + 1}`,
-        bearer_token: `bearer_token_${index + 1}`,
-        party_a: `party_a_${index + 1}`,
-        party_b: `party_b_${index + 1}`,
-        is_active: index % 2 === 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }));
-  };
 
   const filteredApplications = applications.filter(
     app => app.name.toLowerCase().includes(searchTerm.toLowerCase())
