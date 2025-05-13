@@ -21,7 +21,7 @@ export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{
   }
 }
 
-export async function registerAppWithEdgeFunction(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any }> {
+export async function registerAppWithEdgeFunction(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any; alreadySaved?: boolean }> {
   try {
     console.log("Attempting to register with Edge Function");
     const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
@@ -40,7 +40,15 @@ export async function registerAppWithEdgeFunction(data: ApplicationFormValues): 
 
     const apiResponse = await response.json();
     console.log("Edge Function registration response:", apiResponse);
-    return { success: true, apiResponse: apiResponse.data };
+    
+    // Check if the Edge Function response indicates it already saved to Supabase
+    const alreadySaved = apiResponse.saved_to_db === true;
+    
+    return { 
+      success: true, 
+      apiResponse: apiResponse.data,
+      alreadySaved: alreadySaved
+    };
   } catch (error) {
     console.error("Edge Function registration failed:", error);
     return { success: false };
@@ -63,7 +71,7 @@ export async function updateAppWithAPI(id: string, data: ApplicationFormValues):
   }
 }
 
-export async function updateAppWithEdgeFunction(id: string, data: ApplicationFormValues): Promise<{ success: boolean }> {
+export async function updateAppWithEdgeFunction(id: string, data: ApplicationFormValues): Promise<{ success: boolean; alreadySaved?: boolean }> {
   try {
     const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
       method: 'PUT',
@@ -71,7 +79,18 @@ export async function updateAppWithEdgeFunction(id: string, data: ApplicationFor
       body: JSON.stringify({ id, ...data })
     });
     
-    return { success: response.ok };
+    if (!response.ok) {
+      return { success: false };
+    }
+    
+    const apiResponse = await response.json();
+    // Check if the Edge Function response indicates it already saved to Supabase
+    const alreadySaved = apiResponse.saved_to_db === true;
+    
+    return { 
+      success: true,
+      alreadySaved: alreadySaved 
+    };
   } catch (error) {
     console.warn("Edge Function update failed:", error);
     return { success: false };
@@ -94,7 +113,7 @@ export async function toggleStatusWithAPI(id: string, isActive: boolean): Promis
   }
 }
 
-export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean): Promise<{ success: boolean }> {
+export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean): Promise<{ success: boolean; alreadySaved?: boolean }> {
   try {
     const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
       method: 'PUT',
@@ -102,7 +121,18 @@ export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean
       body: JSON.stringify({ id, is_active: isActive })
     });
     
-    return { success: response.ok };
+    if (!response.ok) {
+      return { success: false };
+    }
+    
+    const apiResponse = await response.json();
+    // Check if the Edge Function response indicates it already saved to Supabase
+    const alreadySaved = apiResponse.saved_to_db === true;
+    
+    return { 
+      success: true,
+      alreadySaved: alreadySaved 
+    };
   } catch (error) {
     console.warn("Edge Function status update failed:", error);
     return { success: false };

@@ -45,12 +45,21 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
         console.log("Direct API registration failed, trying Edge Function");
         registrationResult = await registerAppWithEdgeFunction(data);
         
-        // Early return if Edge Function succeeded
+        // Early return if Edge Function succeeded and already saved to DB
         if (registrationResult.success) {
-          const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
-          if (!success) {
-            setIsSubmitting(false);
-            return false;
+          if (registrationResult.alreadySaved) {
+            console.log("Edge Function has already saved the application to database");
+            await fetchApps();
+            setIsDialogOpen(false);
+            toast.success("Application registered via Edge Function!");
+            return true;
+          } else {
+            // Edge Function succeeded but didn't save to DB, so we need to save it
+            const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
+            if (!success) {
+              setIsSubmitting(false);
+              return false;
+            }
           }
           
           await fetchApps();
