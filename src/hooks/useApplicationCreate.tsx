@@ -45,10 +45,9 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
         console.log("Direct API registration failed, trying Edge Function");
         registrationResult = await registerAppWithEdgeFunction(data);
         
-        // Early return if Edge Function succeeded and already saved to DB
         if (registrationResult.success) {
-          // Safely check if alreadySaved property exists and is true
-          if (registrationResult.alreadySaved === true) {
+          // Check if the Edge Function has already saved to Supabase
+          if (registrationResult.alreadySaved) {
             console.log("Edge Function has already saved the application to database");
             await fetchApps();
             setIsDialogOpen(false);
@@ -58,6 +57,7 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
             // Edge Function succeeded but didn't save to DB, so we need to save it
             const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
             if (!success) {
+              toast.error("Failed to save application to database");
               setIsSubmitting(false);
               return false;
             }
@@ -72,10 +72,13 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
       
       // Handle API success case
       if (registrationResult.success && registrationResult.apiResponse) {
-        const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
-        if (!success) {
-          setIsSubmitting(false);
-          return false;
+        // Only try to save to Supabase if the Edge Function hasn't already done so
+        if (!registrationResult.alreadySaved) {
+          const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
+          if (!success) {
+            setIsSubmitting(false);
+            return false;
+          }
         }
         
         await fetchApps();

@@ -43,11 +43,12 @@ export async function registerAppWithEdgeFunction(data: ApplicationFormValues): 
     console.log("Edge Function registration response:", apiResponse);
     
     // Check if the Edge Function response indicates it already saved to Supabase
-    const alreadySaved = apiResponse.saved_to_db === true;
+    // First check if saved_to_db exists, then check if it's true
+    const alreadySaved = !!apiResponse.saved_to_db;
     
     return { 
       success: true, 
-      apiResponse: apiResponse.data,
+      apiResponse: apiResponse.data || apiResponse,
       alreadySaved: alreadySaved
     };
   } catch (error) {
@@ -86,7 +87,8 @@ export async function updateAppWithEdgeFunction(id: string, data: ApplicationFor
     
     const apiResponse = await response.json();
     // Check if the Edge Function response indicates it already saved to Supabase
-    const alreadySaved = apiResponse.saved_to_db === true;
+    // First check if saved_to_db exists, then check if it's true
+    const alreadySaved = !!apiResponse.saved_to_db;
     
     return { 
       success: true,
@@ -128,7 +130,8 @@ export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean
     
     const apiResponse = await response.json();
     // Check if the Edge Function response indicates it already saved to Supabase
-    const alreadySaved = apiResponse.saved_to_db === true;
+    // First check if saved_to_db exists, then check if it's true
+    const alreadySaved = !!apiResponse.saved_to_db;
     
     return { 
       success: true,
