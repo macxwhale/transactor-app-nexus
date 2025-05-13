@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -224,7 +225,7 @@ const Transactions = () => {
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="failed">Failed</SelectItem>
@@ -244,7 +245,7 @@ const Transactions = () => {
                   <SelectValue placeholder="All applications" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All applications</SelectItem>
+                  <SelectItem value="all">All applications</SelectItem>
                   {applications.map((app) => (
                     <SelectItem key={app.id} value={app.id.toString()}>
                       {app.name}
