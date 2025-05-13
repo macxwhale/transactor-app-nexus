@@ -374,7 +374,7 @@ const Applications = () => {
             Edit
           </Button>
           <Button
-            variant={app.is_active ? "destructive" : "success"}
+            variant={app.is_active ? "destructive" : "outline"}
             size="sm"
             onClick={() => openStatusDialog(app.id, !app.is_active)}
           >

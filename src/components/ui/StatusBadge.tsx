@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
-type StatusType = 'success' | 'pending' | 'failed' | 'inactive' | 'active';
+export type StatusType = 'success' | 'pending' | 'failed' | 'inactive' | 'active' | 'completed';
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -11,34 +11,46 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, text, className }: StatusBadgeProps) {
+  // Map status to configuration
   const statusConfig = {
     success: {
-      variant: "success",
+      variant: "success" as const,
+      label: text || "Completed",
+    },
+    completed: {
+      variant: "success" as const,
       label: text || "Completed",
     },
     pending: {
-      variant: "warning",
+      variant: "warning" as const,
       label: text || "Pending",
     },
     failed: {
-      variant: "destructive",
+      variant: "destructive" as const,
       label: text || "Failed",
     },
     inactive: {
-      variant: "outline",
+      variant: "outline" as const,
       label: text || "Inactive",
     },
     active: {
-      variant: "success",
+      variant: "success" as const,
       label: text || "Active",
     },
-  }[status];
+  };
 
-  const variant = statusConfig.variant as "default" | "secondary" | "destructive" | "outline" | "success" | "warning";
+  // Get the configuration for the current status or use a default
+  const config = statusConfig[status] || {
+    variant: "outline" as const,
+    label: text || status,
+  };
+
+  // Use the variant from the config or fall back to "default"
+  const variant = config.variant as "default" | "secondary" | "destructive" | "outline" | "success" | "warning";
 
   return (
     <Badge variant={variant} className={cn(className)}>
-      {statusConfig.label}
+      {config.label}
     </Badge>
   );
 }

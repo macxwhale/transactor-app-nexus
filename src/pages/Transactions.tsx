@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { StatusBadge, StatusType } from "@/components/ui/StatusBadge";
 import { DataTable } from "@/components/ui/data-table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -154,7 +153,7 @@ const Transactions = () => {
     {
       id: "status",
       header: "Status",
-      cell: (tx: Transaction) => <StatusBadge status={tx.status} />,
+      cell: (tx: Transaction) => <StatusBadge status={tx.status as StatusType} />,
     },
     {
       id: "actions",
@@ -361,7 +360,7 @@ const Transactions = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
-                  <StatusBadge status={selectedTx.status} className="mt-1" />
+                  <StatusBadge status={selectedTx.status as StatusType} className="mt-1" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Transaction Date</p>
