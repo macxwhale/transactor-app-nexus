@@ -12,9 +12,9 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateApplication = async (data: ApplicationFormValues) => {
-    if (isSubmitting) return false; // Prevent multiple submissions
-    
+    if (isSubmitting) return false;
     setIsSubmitting(true);
+
     try {
       console.log("Creating application with data:", data);
       
@@ -29,22 +29,19 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
         // Early return if Edge Function succeeded
         if (registrationResult.success) {
           const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
-          if (success) {
-            await fetchApps();
-            setIsDialogOpen(false);
-            toast.success("Application registered via Edge Function!");
-            return true;
-          }
-          return false;
+          if (!success) return false;
+          
+          await fetchApps();
+          setIsDialogOpen(false);
+          toast.success("Application registered via Edge Function!");
+          return true;
         }
       }
       
       // Handle API success case
       if (registrationResult.success && registrationResult.apiResponse) {
         const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
-        if (!success) {
-          return false;
-        }
+        if (!success) return false;
         
         await fetchApps();
         setIsDialogOpen(false);
@@ -52,11 +49,11 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
         return true;
       }
       
-      toast.error("Failed to register application with both direct API and Edge Function");
+      toast.error("Failed to register application with both methods");
       return false;
     } catch (error) {
-      console.error("Failed to register application:", error);
-      toast.error("Failed to register application");
+      console.error("Registration failed:", error);
+      toast.error("Registration failed");
       return false;
     } finally {
       setIsSubmitting(false);
@@ -67,6 +64,6 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
     isDialogOpen,
     setIsDialogOpen,
     handleCreateApplication,
-    isSubmitting // Expose this to disable form buttons
+    isSubmitting
   };
 }
