@@ -18,8 +18,8 @@ export function useApplications() {
   const fetchApps = async () => {
     setIsLoading(true);
     try {
-      // Use Supabase to fetch real applications data
-      const { data: appsData, error } = await supabase
+      // Use Supabase to fetch applications data directly
+      const { data, error } = await supabase
         .from('applications')
         .select('*');
       
@@ -28,7 +28,7 @@ export function useApplications() {
       }
       
       // Convert Supabase applications data to our Application type
-      const formattedApps: Application[] = appsData.map(app => ({
+      const formattedApps: Application[] = data.map(app => ({
         id: app.id,
         name: app.name,
         callback_url: app.callback_url || '',
@@ -69,14 +69,11 @@ export function useApplications() {
       // Call the external API endpoint for registration
       const newApp = await createApplication(data);
       
-      // After successful registration, update the local list
-      setApplications([...applications, newApp]);
-      setIsDialogOpen(false);
-      toast.success("Application registered successfully");
-      
-      // Refresh the list from the database to ensure all fields are present
+      // After successful registration, refresh the list to get latest data
       fetchApps();
       
+      setIsDialogOpen(false);
+      toast.success("Application registered successfully");
       return true;
     } catch (error) {
       console.error("Failed to register application:", error);
@@ -101,19 +98,13 @@ export function useApplications() {
       apiClient.setBaseUrl(apiDomain);
       
       // Call the external API endpoint for updating
-      const updatedApp = await updateApplication(editingApp.id, data);
+      await updateApplication(editingApp.id, data);
       
-      // Update the local list
-      setApplications(applications.map(app => 
-        app.id === editingApp.id ? updatedApp : app
-      ));
+      // Refresh the list to get latest data
+      fetchApps();
       
       setEditingApp(null);
       toast.success("Application updated successfully");
-      
-      // Refresh from database to ensure all fields are present
-      fetchApps();
-      
       return true;
     } catch (error) {
       console.error("Failed to update application:", error);
@@ -138,16 +129,13 @@ export function useApplications() {
       apiClient.setBaseUrl(apiDomain);
       
       // Call the external API endpoint for status toggle
-      const updatedApp = await toggleApplicationStatus(selectedAppId, newStatus);
+      await toggleApplicationStatus(selectedAppId, newStatus);
       
-      // Update the local list
-      setApplications(applications.map(app => 
-        app.id === selectedAppId ? updatedApp : app
-      ));
+      // Refresh the list to get latest data
+      fetchApps();
       
       setIsStatusDialogOpen(false);
       toast.success(`Application ${newStatus ? 'activated' : 'deactivated'} successfully`);
-      
       return true;
     } catch (error) {
       console.error("Failed to toggle application status:", error);
