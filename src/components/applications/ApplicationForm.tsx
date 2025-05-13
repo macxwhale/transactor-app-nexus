@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+// Update schema to reflect that app_id and app_secret are not part of the form
 const applicationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   callback_url: z.string().url("Must be a valid URL starting with https://"),
