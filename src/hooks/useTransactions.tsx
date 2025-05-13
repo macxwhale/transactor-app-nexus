@@ -32,7 +32,7 @@ export function useTransactions() {
       }
       
       // Convert Supabase applications data to our Application type
-      const formattedApps = appsData.map(app => ({
+      const formattedApps: Application[] = appsData.map(app => ({
         id: app.id,
         name: app.name,
         callback_url: '',
@@ -93,7 +93,7 @@ export function useTransactions() {
       }
       
       // Convert Supabase transactions data to our Transaction type
-      const formattedTransactions = txData.map(tx => ({
+      const formattedTransactions: Transaction[] = txData.map(tx => ({
         id: tx.id,
         mpesa_receipt_number: tx.mpesa_receipt_number || '',
         phone_number: tx.phone_number,

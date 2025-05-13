@@ -85,7 +85,7 @@ export const apiClient = new ApiClient();
 
 // Types
 export interface Application {
-  id: number;
+  id: string; // Changed from number to string
   name: string;
   callback_url: string;
   consumer_key: string;
@@ -101,13 +101,13 @@ export interface Application {
 }
 
 export interface Transaction {
-  id: number;
+  id: string; // Changed from number to string
   mpesa_receipt_number: string;
   phone_number: string;
   amount: number;
   status: 'pending' | 'completed' | 'failed';
   transaction_date: string;
-  application_id: number;
+  application_id: string; // Changed from number to string
   application_name?: string;
   created_at: string;
   updated_at: string;
