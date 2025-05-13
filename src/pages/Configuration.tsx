@@ -148,6 +148,9 @@ const Configuration = () => {
               <div className="bg-muted p-3 rounded-md font-mono text-sm">
                 POST /register
               </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Fallback: Supabase Edge Function at https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app
+              </p>
             </div>
             
             <div>
@@ -158,6 +161,9 @@ const Configuration = () => {
               <div className="bg-muted p-3 rounded-md font-mono text-sm">
                 PUT /applications/:id
               </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Fallback: Edge Function (PUT method)
+              </p>
             </div>
             
             <div>
@@ -168,6 +174,9 @@ const Configuration = () => {
               <div className="bg-muted p-3 rounded-md font-mono text-sm">
                 PUT /applications/:id/toggle-status
               </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Fallback: Edge Function (PUT method with is_active parameter)
+              </p>
             </div>
             
             <div>

@@ -74,6 +74,11 @@ const Applications = () => {
                 <DialogTitle>Register New Application</DialogTitle>
                 <DialogDescription>
                   Fill out this form to register a new M-Pesa application.
+                  {localStorage.getItem("apiDomain") ? (
+                    <span className="block mt-2 text-xs">Using API: {localStorage.getItem("apiDomain")} (with Edge Function fallback)</span>
+                  ) : (
+                    <span className="block mt-2 text-xs">Using Edge Function: https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app</span>
+                  )}
                 </DialogDescription>
               </DialogHeader>
               <ApplicationForm onSubmit={handleCreateApplication} />
@@ -108,6 +113,9 @@ const Applications = () => {
               <DialogTitle>Edit Application</DialogTitle>
               <DialogDescription>
                 Update the details for {editingApp.name}
+                {localStorage.getItem("apiDomain") && (
+                  <span className="block mt-2 text-xs">API updates will be attempted with fallback to Edge Function</span>
+                )}
               </DialogDescription>
             </DialogHeader>
             <ApplicationForm 
