@@ -6,7 +6,7 @@ import {
   registerAppWithAPI,
   registerAppWithEdgeFunction
 } from "@/services/applicationApiService";
-import { saveApplicationToSupabase, checkApplicationExists } from "@/services/applicationSupabaseService";
+import { checkApplicationExists } from "@/services/applicationSupabaseService";
 
 export function useApplicationCreate(fetchApps: () => Promise<void>) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -46,41 +46,14 @@ export function useApplicationCreate(fetchApps: () => Promise<void>) {
         registrationResult = await registerAppWithEdgeFunction(data);
         
         if (registrationResult.success) {
-          // Check if the Edge Function has already saved to Supabase
-          if (registrationResult.alreadySaved) {
-            console.log("Edge Function has already saved the application to database");
-            await fetchApps();
-            setIsDialogOpen(false);
-            toast.success("Application registered via Edge Function!");
-            return true;
-          } else {
-            // Edge Function succeeded but didn't save to DB, so we need to save it
-            const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
-            if (!success) {
-              toast.error("Failed to save application to database");
-              setIsSubmitting(false);
-              return false;
-            }
-          }
-          
+          // If Edge Function call succeeded, refresh the app list and close dialog
           await fetchApps();
           setIsDialogOpen(false);
           toast.success("Application registered via Edge Function!");
           return true;
         }
-      }
-      
-      // Handle API success case
-      if (registrationResult.success && registrationResult.apiResponse) {
-        // Only try to save to Supabase if the Edge Function hasn't already done so
-        if (!registrationResult.alreadySaved) {
-          const success = await saveApplicationToSupabase(registrationResult.apiResponse, data);
-          if (!success) {
-            setIsSubmitting(false);
-            return false;
-          }
-        }
-        
+      } else if (registrationResult.success) {
+        // If API registration succeeded, refresh the app list and close dialog
         await fetchApps();
         setIsDialogOpen(false);
         toast.success("Application registered successfully");

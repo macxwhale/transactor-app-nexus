@@ -1,4 +1,3 @@
-
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
 import { apiClient, createApplication, updateApplication, toggleApplicationStatus } from "@/lib/api";
 
@@ -15,7 +14,7 @@ export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{
     apiClient.setBaseUrl(apiDomain);
     const apiResponse = await createApplication(data);
     console.log("API registration response:", apiResponse);
-    return { success: true, apiResponse, alreadySaved: false };
+    return { success: true, apiResponse };
   } catch (error) {
     console.error("API registration failed:", error);
     return { success: false };
@@ -42,14 +41,9 @@ export async function registerAppWithEdgeFunction(data: ApplicationFormValues): 
     const apiResponse = await response.json();
     console.log("Edge Function registration response:", apiResponse);
     
-    // Check if the Edge Function response indicates it already saved to Supabase
-    // First check if saved_to_db exists, then check if it's true
-    const alreadySaved = !!apiResponse.saved_to_db;
-    
     return { 
       success: true, 
-      apiResponse: apiResponse.data || apiResponse,
-      alreadySaved: alreadySaved
+      apiResponse: apiResponse.data || apiResponse
     };
   } catch (error) {
     console.error("Edge Function registration failed:", error);
@@ -57,7 +51,7 @@ export async function registerAppWithEdgeFunction(data: ApplicationFormValues): 
   }
 }
 
-export async function updateAppWithAPI(id: string, data: ApplicationFormValues): Promise<{ success: boolean; alreadySaved?: boolean }> {
+export async function updateAppWithAPI(id: string, data: ApplicationFormValues): Promise<{ success: boolean }> {
   const apiDomain = localStorage.getItem("apiDomain");
   if (!apiDomain) {
     return { success: false };
@@ -66,14 +60,14 @@ export async function updateAppWithAPI(id: string, data: ApplicationFormValues):
   try {
     apiClient.setBaseUrl(apiDomain);
     await updateApplication(id, data);
-    return { success: true, alreadySaved: false };
+    return { success: true };
   } catch (error) {
     console.warn("API update failed:", error);
     return { success: false };
   }
 }
 
-export async function updateAppWithEdgeFunction(id: string, data: ApplicationFormValues): Promise<{ success: boolean; alreadySaved?: boolean }> {
+export async function updateAppWithEdgeFunction(id: string, data: ApplicationFormValues): Promise<{ success: boolean }> {
   try {
     const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
       method: 'PUT',
@@ -86,14 +80,8 @@ export async function updateAppWithEdgeFunction(id: string, data: ApplicationFor
     }
     
     const apiResponse = await response.json();
-    // Check if the Edge Function response indicates it already saved to Supabase
-    // First check if saved_to_db exists, then check if it's true
-    const alreadySaved = !!apiResponse.saved_to_db;
     
-    return { 
-      success: true,
-      alreadySaved: alreadySaved 
-    };
+    return { success: true };
   } catch (error) {
     console.warn("Edge Function update failed:", error);
     return { success: false };
@@ -116,7 +104,7 @@ export async function toggleStatusWithAPI(id: string, isActive: boolean): Promis
   }
 }
 
-export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean): Promise<{ success: boolean; alreadySaved?: boolean }> {
+export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean): Promise<{ success: boolean }> {
   try {
     const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
       method: 'PUT',
@@ -129,14 +117,8 @@ export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean
     }
     
     const apiResponse = await response.json();
-    // Check if the Edge Function response indicates it already saved to Supabase
-    // First check if saved_to_db exists, then check if it's true
-    const alreadySaved = !!apiResponse.saved_to_db;
     
-    return { 
-      success: true,
-      alreadySaved: alreadySaved 
-    };
+    return { success: true };
   } catch (error) {
     console.warn("Edge Function status update failed:", error);
     return { success: false };
