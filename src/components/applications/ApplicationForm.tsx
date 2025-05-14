@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +14,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Copy, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Update schema to reflect that app_id and app_secret are not part of the form
 const applicationSchema = z.object({
@@ -36,6 +43,10 @@ interface ApplicationFormProps {
   defaultValues?: Partial<ApplicationFormValues>;
   isEditing?: boolean;
   isSubmitting?: boolean;
+  appCredentials?: {
+    app_id?: string;
+    app_secret?: string;
+  };
 }
 
 const ApplicationForm = ({
@@ -43,6 +54,7 @@ const ApplicationForm = ({
   defaultValues,
   isEditing = false,
   isSubmitting = false,
+  appCredentials,
 }: ApplicationFormProps) => {
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationSchema),
@@ -59,12 +71,37 @@ const ApplicationForm = ({
     },
   });
 
+  const [isSecretVisible, setIsSecretVisible] = useState(false);
+  
+  // Auto-mask after 30 seconds of inactivity when secret is visible
+  React.useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (isSecretVisible) {
+      timeoutId = setTimeout(() => {
+        setIsSecretVisible(false);
+      }, 30000); // 30 seconds
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isSecretVisible]);
+
   // Function to handle form submission
   const handleSubmit = (data: ApplicationFormValues) => {
     // Only submit if not already submitting
     if (!isSubmitting) {
       onSubmit(data);
     }
+    
+    // Always mask the secret when form is submitted
+    setIsSecretVisible(false);
+  };
+
+  // Function to copy text to clipboard
+  const copyToClipboard = (text: string, fieldName: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => toast.success(`${fieldName} copied to clipboard`))
+      .catch(() => toast.error(`Failed to copy ${fieldName}`));
   };
 
   return (
@@ -103,6 +140,86 @@ const ApplicationForm = ({
             )}
           />
         </div>
+
+        {/* App credentials section - only shown when editing */}
+        {isEditing && appCredentials && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/20 p-3 rounded-md border">
+            <div>
+              <FormLabel htmlFor="app_id">App ID (Not editable)</FormLabel>
+              <div className="flex mt-1">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="relative flex-1">
+                        <Input 
+                          id="app_id"
+                          value={appCredentials.app_id || ""}
+                          className="bg-muted/30 pr-10" 
+                          readOnly
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>This field cannot be edited</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="ml-2"
+                  onClick={() => copyToClipboard(appCredentials.app_id || "", "App ID")}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <div>
+              <FormLabel htmlFor="app_secret">App Secret (Not editable)</FormLabel>
+              <div className="flex mt-1">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="relative flex-1">
+                        <Input 
+                          id="app_secret"
+                          value={isSecretVisible 
+                            ? appCredentials.app_secret || "" 
+                            : "•".repeat(Math.min(12, (appCredentials.app_secret || "").length))}
+                          className="bg-muted/30 pr-10" 
+                          readOnly
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>This field cannot be edited</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="ml-2"
+                  onClick={() => setIsSecretVisible(!isSecretVisible)}
+                >
+                  {isSecretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="ml-2"
+                  onClick={() => copyToClipboard(appCredentials.app_secret || "", "App Secret")}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField

@@ -127,6 +127,10 @@ const Applications = () => {
               defaultValues={editingApp}
               isEditing
               isSubmitting={isSubmitting}
+              appCredentials={{
+                app_id: editingApp.app_id,
+                app_secret: editingApp.app_secret
+              }}
             />
           </DialogContent>
         </Dialog>
