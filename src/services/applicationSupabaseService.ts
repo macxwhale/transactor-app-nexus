@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Application } from "@/lib/api";
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
@@ -48,7 +49,7 @@ export async function fetchApplicationsFromSupabase(): Promise<Application[]> {
   }
 }
 
-// New function to check if an application with the given name already exists
+// Check if an application with the given name already exists
 export async function checkApplicationExists(name: string): Promise<boolean> {
   try {
     const { data, error } = await supabase
@@ -65,55 +66,6 @@ export async function checkApplicationExists(name: string): Promise<boolean> {
     return !!data;
   } catch (error) {
     console.error("Failed to check for existing application:", error);
-    return false;
-  }
-}
-
-export async function saveApplicationToSupabase(
-  apiResponse: any, 
-  data: ApplicationFormValues
-): Promise<boolean> {
-  try {
-    // Check if application already exists (double check for race conditions)
-    const exists = await checkApplicationExists(data.name);
-    
-    if (exists) {
-      console.log("Application already exists in database, preventing duplicate insert");
-      toast.error(`Application "${data.name}" already exists in the database`);
-      return false;
-    }
-
-    // Proceed with insert if the application doesn't exist
-    const { error } = await supabase.from('applications').insert([{
-      name: data.name,
-      callback_url: data.callback_url,
-      consumer_key: data.consumer_key,
-      consumer_secret: data.consumer_secret,
-      business_short_code: data.business_short_code,
-      passkey: data.passkey,
-      bearer_token: data.bearer_token,
-      party_a: data.party_a,
-      party_b: data.party_b,
-      app_id: apiResponse.app_id || apiResponse.id || data.consumer_key,
-      app_secret: apiResponse.app_secret || data.consumer_secret,
-      is_active: true
-    }]);
-    
-    if (error) {
-      // Handle specific error types
-      if (error.code === '23505') { // PostgreSQL unique violation error code
-        console.error("Duplicate application detected:", error);
-        toast.error(`Application with name "${data.name}" already exists`);
-      } else {
-        console.error("Supabase insert error after registration:", error);
-        toast.error(`Failed to register application in database: ${error.message}`);
-      }
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Failed to save application to Supabase:", error);
     return false;
   }
 }

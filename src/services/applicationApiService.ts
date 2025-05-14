@@ -1,8 +1,9 @@
+
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
 import { apiClient, createApplication, updateApplication, toggleApplicationStatus } from "@/lib/api";
 
-// Update return types to include alreadySaved property
-export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any; alreadySaved?: boolean }> {
+// Update return types to be consistent across all functions
+export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any }> {
   const apiDomain = localStorage.getItem("apiDomain");
   if (!apiDomain) {
     console.log("No API domain configured");
@@ -21,7 +22,7 @@ export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{
   }
 }
 
-export async function registerAppWithEdgeFunction(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any; alreadySaved?: boolean }> {
+export async function registerAppWithEdgeFunction(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any }> {
   try {
     console.log("Attempting to register with Edge Function");
     const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
@@ -79,7 +80,7 @@ export async function updateAppWithEdgeFunction(id: string, data: ApplicationFor
       return { success: false };
     }
     
-    const apiResponse = await response.json();
+    await response.json();
     
     return { success: true };
   } catch (error) {
@@ -116,7 +117,7 @@ export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean
       return { success: false };
     }
     
-    const apiResponse = await response.json();
+    await response.json();
     
     return { success: true };
   } catch (error) {
