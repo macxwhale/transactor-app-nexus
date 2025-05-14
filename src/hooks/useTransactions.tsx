@@ -25,7 +25,7 @@ export function useTransactions() {
       // Fetch applications from Supabase
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, name, is_active, business_short_code');
+        .select('id, name, is_active, business_short_code, app_id, app_secret');
       
       if (appsError) {
         throw appsError;
@@ -45,7 +45,9 @@ export function useTransactions() {
         party_b: '',
         is_active: app.is_active ?? true,
         created_at: '',
-        updated_at: ''
+        updated_at: '',
+        app_id: app.app_id || '',
+        app_secret: app.app_secret || ''
       }));
       
       setApplications(formattedApps);

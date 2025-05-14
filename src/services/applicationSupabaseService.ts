@@ -37,7 +37,9 @@ export async function fetchApplicationsFromSupabase(): Promise<Application[]> {
       party_b: app.party_b,
       is_active: app.is_active ?? true,
       created_at: app.created_at || new Date().toISOString(),
-      updated_at: app.updated_at || new Date().toISOString()
+      updated_at: app.updated_at || new Date().toISOString(),
+      app_id: app.app_id || '',
+      app_secret: app.app_secret || ''
     }));
     
     console.log("Formatted applications:", formattedApps);
