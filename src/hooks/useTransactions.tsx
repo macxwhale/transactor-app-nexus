@@ -98,12 +98,22 @@ export function useTransactions() {
         mpesa_receipt_number: tx.mpesa_receipt_number || '',
         phone_number: tx.phone_number,
         amount: Number(tx.amount),
-        status: tx.status.toLowerCase() as 'pending' | 'completed' | 'failed',
+        status: tx.status?.toLowerCase() as 'pending' | 'completed' | 'failed',
         transaction_date: new Date(tx.transaction_date).toISOString(),
         application_id: tx.app_id,
         application_name: formattedApps.find(app => app.id === tx.app_id)?.name || `App ID: ${tx.app_id}`,
         created_at: new Date(tx.created_at).toISOString(),
-        updated_at: new Date(tx.updated_at).toISOString()
+        updated_at: new Date(tx.updated_at).toISOString(),
+        
+        // Include additional fields
+        account_reference: tx.account_reference,
+        transaction_desc: tx.transaction_desc,
+        result_code: tx.result_code,
+        result_desc: tx.result_desc,
+        checkout_request_id: tx.checkout_request_id,
+        merchant_request_id: tx.merchant_request_id,
+        completed_at: tx.completed_at ? new Date(tx.completed_at).toISOString() : undefined,
+        narration: tx.narration
       }));
       
       setTransactions(formattedTransactions);

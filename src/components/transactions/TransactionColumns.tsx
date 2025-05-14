@@ -12,7 +12,7 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
       header: "Receipt No.",
       cell: (tx: Transaction) => (
         <div>
-          <div className="font-medium">{tx.mpesa_receipt_number}</div>
+          <div className="font-medium">{tx.mpesa_receipt_number || "Pending"}</div>
           <div className="text-sm text-muted-foreground">
             {tx.phone_number}
           </div>
@@ -24,6 +24,22 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
       header: "Amount",
       cell: (tx: Transaction) => (
         <div className="font-medium">{formatCurrency(tx.amount)}</div>
+      ),
+    },
+    {
+      id: "reference",
+      header: "Reference",
+      cell: (tx: Transaction) => (
+        <div>
+          <div className="font-medium truncate max-w-[150px]" title={tx.account_reference}>
+            {tx.account_reference}
+          </div>
+          {tx.result_code !== undefined && (
+            <div className="text-sm text-muted-foreground">
+              Code: {tx.result_code}
+            </div>
+          )}
+        </div>
       ),
     },
     {

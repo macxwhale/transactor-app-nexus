@@ -70,6 +70,7 @@ export type Database = {
           app_id: string
           application: string | null
           checkout_request_id: string | null
+          completed_at: string | null
           created_at: string | null
           id: string
           merchant_request_id: string | null
@@ -77,6 +78,9 @@ export type Database = {
           narration: string | null
           party_a: string
           phone_number: string
+          raw_callback: Json | null
+          result_code: number | null
+          result_desc: string | null
           status: string | null
           transaction_date: number | null
           transaction_desc: string
@@ -88,6 +92,7 @@ export type Database = {
           app_id: string
           application?: string | null
           checkout_request_id?: string | null
+          completed_at?: string | null
           created_at?: string | null
           id?: string
           merchant_request_id?: string | null
@@ -95,6 +100,9 @@ export type Database = {
           narration?: string | null
           party_a: string
           phone_number: string
+          raw_callback?: Json | null
+          result_code?: number | null
+          result_desc?: string | null
           status?: string | null
           transaction_date?: number | null
           transaction_desc?: string
@@ -106,6 +114,7 @@ export type Database = {
           app_id?: string
           application?: string | null
           checkout_request_id?: string | null
+          completed_at?: string | null
           created_at?: string | null
           id?: string
           merchant_request_id?: string | null
@@ -113,6 +122,9 @@ export type Database = {
           narration?: string | null
           party_a?: string
           phone_number?: string
+          raw_callback?: Json | null
+          result_code?: number | null
+          result_desc?: string | null
           status?: string | null
           transaction_date?: number | null
           transaction_desc?: string
