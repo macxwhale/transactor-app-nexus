@@ -5,7 +5,6 @@ import {
   toggleStatusWithAPI,
   toggleStatusWithEdgeFunction
 } from "@/services/applicationApiService";
-import { updateApplicationStatusInSupabase } from "@/services/applicationSupabaseService";
 
 export function useApplicationToggle(fetchApps: () => Promise<void>) {
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
@@ -16,30 +15,43 @@ export function useApplicationToggle(fetchApps: () => Promise<void>) {
     if (!selectedAppId) return false;
     
     try {
-      // Update the status in Supabase directly
-      const supabaseSuccess = await updateApplicationStatusInSupabase(selectedAppId, newStatus);
-      if (!supabaseSuccess) {
-        return false;
-      }
-
-      // Additionally, try to update status with the API if apiDomain is configured
+      // Try to update status with the API if apiDomain is configured
       const apiDomain = localStorage.getItem("apiDomain");
+      let success = false;
+      
       if (apiDomain) {
         // Try API update first
         const apiResult = await toggleStatusWithAPI(selectedAppId, newStatus);
         
-        // If API update fails, try Edge Function as fallback
-        if (!apiResult.success) {
-          await toggleStatusWithEdgeFunction(selectedAppId, newStatus);
+        // If API update succeeds
+        if (apiResult.success) {
+          success = true;
+        } else {
+          // If API update fails, try Edge Function as fallback
+          const edgeResult = await toggleStatusWithEdgeFunction(selectedAppId, newStatus);
+          if (edgeResult.success) {
+            success = true;
+          }
+        }
+      } else {
+        // No API domain configured, use Edge Function directly
+        const edgeResult = await toggleStatusWithEdgeFunction(selectedAppId, newStatus);
+        if (edgeResult.success) {
+          success = true;
         }
       }
       
-      // Refresh the applications list
-      await fetchApps();
-      
-      setIsStatusDialogOpen(false);
-      toast.success(`Application ${newStatus ? 'activated' : 'deactivated'} successfully`);
-      return true;
+      if (success) {
+        // Refresh the applications list
+        await fetchApps();
+        
+        setIsStatusDialogOpen(false);
+        toast.success(`Application ${newStatus ? 'activated' : 'deactivated'} successfully`);
+        return true;
+      } else {
+        toast.error("Failed to toggle application status");
+        return false;
+      }
     } catch (error) {
       console.error("Failed to toggle application status:", error);
       toast.error("Failed to toggle application status");
