@@ -98,6 +98,9 @@ export interface Application {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // Add the missing fields that are in the Supabase schema
+  app_id: string;
+  app_secret: string;
 }
 
 export interface Transaction {
