@@ -1,22 +1,12 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Form } from "@/components/ui/form";
 import AppCredentialsSection from "./AppCredentialsSection";
 import FormFieldGroup from "./FormFieldGroup";
+import FormSubmitButton from "./FormSubmitButton";
 
 // Schema definition
 const applicationSchema = z.object({
@@ -162,16 +152,11 @@ const ApplicationForm = ({
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {isEditing ? "Updating..." : "Registering..."}
-            </>
-          ) : (
-            isEditing ? "Update Application" : "Register Application"
-          )}
-        </Button>
+        {/* Submit Button */}
+        <FormSubmitButton 
+          isSubmitting={isSubmitting}
+          isEditing={isEditing}
+        />
       </form>
     </Form>
   );
