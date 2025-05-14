@@ -19,6 +19,14 @@ export function TransactionDetailsDialog({
 }: TransactionDetailsDialogProps) {
   if (!transaction) return null;
 
+  // Helper function to display N/A for null or undefined values
+  const displayValue = (value: any, formatter?: (val: any) => string) => {
+    if (value === null || value === undefined || value === '') {
+      return "N/A";
+    }
+    return formatter ? formatter(value) : value;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -30,15 +38,15 @@ export function TransactionDetailsDialog({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Receipt Number</p>
-              <p className="font-medium">{transaction.mpesa_receipt_number || "N/A"}</p>
+              <p className="font-medium">{displayValue(transaction.mpesa_receipt_number)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Phone Number</p>
-              <p className="font-medium">{transaction.phone_number}</p>
+              <p className="font-medium">{displayValue(transaction.phone_number)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Amount</p>
-              <p className="font-medium">{formatCurrency(transaction.amount)}</p>
+              <p className="font-medium">{displayValue(transaction.amount, formatCurrency)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Status</p>
@@ -52,13 +60,13 @@ export function TransactionDetailsDialog({
           <div className="space-y-3">
             <div>
               <p className="text-sm text-muted-foreground">Reference</p>
-              <p className="font-medium">{transaction.account_reference || "N/A"}</p>
+              <p className="font-medium">{displayValue(transaction.account_reference)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Description</p>
-              <p className="font-medium">{transaction.transaction_desc || "N/A"}</p>
+              <p className="font-medium">{displayValue(transaction.transaction_desc)}</p>
             </div>
-            {transaction.narration && (
+            {transaction.narration !== null && transaction.narration !== undefined && transaction.narration !== '' && (
               <div>
                 <p className="text-sm text-muted-foreground">Narration</p>
                 <p className="font-medium">{transaction.narration}</p>
@@ -73,17 +81,17 @@ export function TransactionDetailsDialog({
             <div>
               <p className="text-sm text-muted-foreground">Application</p>
               <p className="font-medium">
-                {transaction.application_name || `App ID: ${transaction.application_id}`}
+                {displayValue(transaction.application_name || transaction.application_id && `App ID: ${transaction.application_id}`)}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Result Code</p>
-              <p className="font-medium">{transaction.result_code !== undefined ? transaction.result_code : "N/A"}</p>
+              <p className="font-medium">{displayValue(transaction.result_code)}</p>
             </div>
             {transaction.result_desc && (
               <div className="col-span-2">
                 <p className="text-sm text-muted-foreground">Result Description</p>
-                <p className="font-medium">{transaction.result_desc}</p>
+                <p className="font-medium">{displayValue(transaction.result_desc)}</p>
               </div>
             )}
           </div>
@@ -94,21 +102,21 @@ export function TransactionDetailsDialog({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Transaction Date</p>
-              <p className="font-medium">{formatDate(transaction.transaction_date)}</p>
+              <p className="font-medium">{displayValue(transaction.transaction_date, formatDate)}</p>
             </div>
             {transaction.completed_at && (
               <div>
                 <p className="text-sm text-muted-foreground">Completed At</p>
-                <p className="font-medium">{formatDate(transaction.completed_at)}</p>
+                <p className="font-medium">{displayValue(transaction.completed_at, formatDate)}</p>
               </div>
             )}
             <div>
               <p className="text-sm text-muted-foreground">Created At</p>
-              <p className="font-medium">{formatDate(transaction.created_at)}</p>
+              <p className="font-medium">{displayValue(transaction.created_at, formatDate)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Updated At</p>
-              <p className="font-medium">{formatDate(transaction.updated_at)}</p>
+              <p className="font-medium">{displayValue(transaction.updated_at, formatDate)}</p>
             </div>
           </div>
 
@@ -120,13 +128,13 @@ export function TransactionDetailsDialog({
                 {transaction.merchant_request_id && (
                   <div>
                     <p className="text-sm text-muted-foreground">Merchant Request ID</p>
-                    <p className="font-medium text-xs break-all">{transaction.merchant_request_id}</p>
+                    <p className="font-medium text-xs break-all">{displayValue(transaction.merchant_request_id)}</p>
                   </div>
                 )}
                 {transaction.checkout_request_id && (
                   <div>
                     <p className="text-sm text-muted-foreground">Checkout Request ID</p>
-                    <p className="font-medium text-xs break-all">{transaction.checkout_request_id}</p>
+                    <p className="font-medium text-xs break-all">{displayValue(transaction.checkout_request_id)}</p>
                   </div>
                 )}
               </div>

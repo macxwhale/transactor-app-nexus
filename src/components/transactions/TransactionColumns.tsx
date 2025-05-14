@@ -6,15 +6,23 @@ import { StatusBadge, StatusType } from "@/components/ui/StatusBadge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) {
+  // Helper function to display N/A for null or undefined values
+  const displayValue = (value: any, formatter?: (val: any) => string) => {
+    if (value === null || value === undefined || value === '') {
+      return "N/A";
+    }
+    return formatter ? formatter(value) : value;
+  };
+
   return [
     {
       id: "receipt",
       header: "Receipt No.",
       cell: (tx: Transaction) => (
         <div>
-          <div className="font-medium">{tx.mpesa_receipt_number || "Pending"}</div>
+          <div className="font-medium">{displayValue(tx.mpesa_receipt_number, (val) => val || "Pending")}</div>
           <div className="text-sm text-muted-foreground">
-            {tx.phone_number}
+            {displayValue(tx.phone_number)}
           </div>
         </div>
       ),
@@ -23,7 +31,7 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
       id: "amount",
       header: "Amount",
       cell: (tx: Transaction) => (
-        <div className="font-medium">{formatCurrency(tx.amount)}</div>
+        <div className="font-medium">{displayValue(tx.amount, formatCurrency)}</div>
       ),
     },
     {
@@ -31,12 +39,12 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
       header: "Reference",
       cell: (tx: Transaction) => (
         <div>
-          <div className="font-medium truncate max-w-[150px]" title={tx.account_reference}>
-            {tx.account_reference}
+          <div className="font-medium truncate max-w-[150px]" title={displayValue(tx.account_reference)}>
+            {displayValue(tx.account_reference)}
           </div>
           {tx.result_code !== undefined && (
             <div className="text-sm text-muted-foreground">
-              Code: {tx.result_code}
+              Code: {displayValue(tx.result_code)}
             </div>
           )}
         </div>
@@ -45,12 +53,12 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
     {
       id: "date",
       header: "Date",
-      cell: (tx: Transaction) => formatDate(tx.transaction_date),
+      cell: (tx: Transaction) => displayValue(tx.transaction_date, formatDate),
     },
     {
       id: "application",
       header: "Application",
-      cell: (tx: Transaction) => tx.application_name || `App ID: ${tx.application_id}`,
+      cell: (tx: Transaction) => displayValue(tx.application_name || `App ID: ${tx.application_id}`),
     },
     {
       id: "status",
