@@ -4,7 +4,6 @@ import { fetchApplicationsFromSupabase } from "@/services/applicationSupabaseSer
 import { useApplicationState } from "./useApplicationState";
 import { useApplicationCreate } from "./useApplicationCreate";
 import { useApplicationUpdate } from "./useApplicationUpdate";
-import { useApplicationToggle } from "./useApplicationToggle";
 
 export function useApplications() {
   const {
@@ -38,15 +37,6 @@ export function useApplications() {
     handleUpdateApplication,
     isSubmitting: isUpdateSubmitting
   } = useApplicationUpdate(fetchApps);
-  
-  const { 
-    isStatusDialogOpen, 
-    setIsStatusDialogOpen,
-    selectedAppId,
-    newStatus,
-    handleToggleStatus,
-    openStatusDialog
-  } = useApplicationToggle(fetchApps);
 
   // Combine submission states
   const isSubmitting = isCreateSubmitting || isUpdateSubmitting;
@@ -60,20 +50,14 @@ export function useApplications() {
     applications: filteredApplications,
     isLoading,
     editingApp,
-    isStatusDialogOpen,
-    selectedAppId,
-    newStatus,
     isDialogOpen,
     searchTerm,
     setSearchTerm,
     setIsDialogOpen,
     setEditingApp,
-    setIsStatusDialogOpen,
     fetchApps,
     handleCreateApplication,
     handleUpdateApplication,
-    handleToggleStatus,
-    openStatusDialog,
     isSubmitting
   };
 }

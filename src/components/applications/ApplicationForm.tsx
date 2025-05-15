@@ -153,10 +153,12 @@ const ApplicationForm = ({
         </div>
 
         {/* Submit Button */}
-        <FormSubmitButton 
-          isSubmitting={isSubmitting}
-          isEditing={isEditing}
-        />
+        <div className="flex justify-between items-center pt-4">
+          <FormSubmitButton 
+            isSubmitting={isSubmitting}
+            isEditing={isEditing}
+          />
+        </div>
       </form>
     </Form>
   );
