@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Application } from "@/lib/api";
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
@@ -69,5 +68,81 @@ export async function checkApplicationExists(name: string): Promise<boolean> {
   } catch (error) {
     console.error("Failed to check for existing application:", error);
     return false;
+  }
+}
+
+// Check if another application (not the current one) with the same name exists
+export async function checkDuplicateApplicationName(name: string, currentAppId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('applications')
+      .select('id')
+      .eq('name', name)
+      .neq('id', currentAppId)
+      .maybeSingle();
+    
+    if (error) {
+      console.error("Error checking for duplicate application name:", error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error("Failed to check for duplicate application name:", error);
+    return false;
+  }
+}
+
+// Update application directly in Supabase
+export async function updateApplicationInSupabase(id: string, data: ApplicationFormValues): Promise<{ success: boolean; message?: string }> {
+  try {
+    // Don't include app_id and app_secret in the update data
+    const { 
+      name,
+      callback_url,
+      consumer_key,
+      consumer_secret,
+      business_short_code,
+      passkey,
+      bearer_token,
+      party_a,
+      party_b
+    } = data;
+
+    // Check if another app with the same name exists
+    const isDuplicate = await checkDuplicateApplicationName(name, id);
+    if (isDuplicate) {
+      return { 
+        success: false, 
+        message: `Another application with name "${name}" already exists` 
+      };
+    }
+
+    // Perform the update with only the allowed fields
+    const { error } = await supabase
+      .from('applications')
+      .update({
+        name,
+        callback_url,
+        consumer_key,
+        consumer_secret,
+        business_short_code,
+        passkey,
+        bearer_token,
+        party_a,
+        party_b,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error("Supabase update error:", error);
+      return { success: false, message: error.message };
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update application in Supabase:", error);
+    return { success: false, message: error.message };
   }
 }
