@@ -6,10 +6,9 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 
 interface ApplicationColumnProps {
   onEditApplication: (app: Application) => void;
-  onToggleStatus: (id: string, status: boolean) => void;
 }
 
-export const getApplicationColumns = ({ onEditApplication, onToggleStatus }: ApplicationColumnProps) => [
+export const getApplicationColumns = ({ onEditApplication }: ApplicationColumnProps) => [
   {
     id: "name",
     header: "Name",
@@ -38,20 +37,13 @@ export const getApplicationColumns = ({ onEditApplication, onToggleStatus }: App
     id: "actions",
     header: "Actions",
     cell: (app: Application) => (
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end">
         <Button
           variant="outline"
           size="sm"
           onClick={() => onEditApplication(app)}
         >
           Edit
-        </Button>
-        <Button
-          variant={app.is_active ? "destructive" : "outline"}
-          size="sm"
-          onClick={() => onToggleStatus(app.id, !app.is_active)}
-        >
-          {app.is_active ? "Deactivate" : "Activate"}
         </Button>
       </div>
     ),

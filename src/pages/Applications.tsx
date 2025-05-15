@@ -45,8 +45,14 @@ const Applications = () => {
 
   const columns = getApplicationColumns({
     onEditApplication: setEditingApp,
-    onToggleStatus: openStatusDialog,
   });
+
+  // Function to open status dialog from the edit form
+  const handleOpenStatusDialog = () => {
+    if (editingApp) {
+      openStatusDialog(editingApp.id, !editingApp.is_active);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -131,6 +137,8 @@ const Applications = () => {
                 app_id: editingApp.app_id,
                 app_secret: editingApp.app_secret
               }}
+              onToggleStatus={handleOpenStatusDialog}
+              isActive={editingApp.is_active}
             />
           </DialogContent>
         </Dialog>

@@ -7,6 +7,8 @@ import { Form } from "@/components/ui/form";
 import AppCredentialsSection from "./AppCredentialsSection";
 import FormFieldGroup from "./FormFieldGroup";
 import FormSubmitButton from "./FormSubmitButton";
+import { Button } from "@/components/ui/button";
+import { Toggle } from "lucide-react";
 
 // Schema definition
 const applicationSchema = z.object({
@@ -32,6 +34,8 @@ interface ApplicationFormProps {
     app_id?: string;
     app_secret?: string;
   };
+  onToggleStatus?: () => void;
+  isActive?: boolean;
 }
 
 const ApplicationForm = ({
@@ -40,6 +44,8 @@ const ApplicationForm = ({
   isEditing = false,
   isSubmitting = false,
   appCredentials,
+  onToggleStatus,
+  isActive,
 }: ApplicationFormProps) => {
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationSchema),
@@ -152,11 +158,24 @@ const ApplicationForm = ({
           />
         </div>
 
-        {/* Submit Button */}
-        <FormSubmitButton 
-          isSubmitting={isSubmitting}
-          isEditing={isEditing}
-        />
+        {/* Submit and Toggle Status Buttons */}
+        <div className="flex justify-between items-center pt-4">
+          <FormSubmitButton 
+            isSubmitting={isSubmitting}
+            isEditing={isEditing}
+          />
+          
+          {isEditing && onToggleStatus && (
+            <Button
+              type="button"
+              variant={isActive ? "destructive" : "outline"}
+              onClick={onToggleStatus}
+              disabled={isSubmitting}
+            >
+              {isActive ? "Deactivate" : "Activate"} Application
+            </Button>
+          )}
+        </div>
       </form>
     </Form>
   );
