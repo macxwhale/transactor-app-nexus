@@ -7,7 +7,6 @@ import { Form } from "@/components/ui/form";
 import AppCredentialsSection from "./AppCredentialsSection";
 import FormFieldGroup from "./FormFieldGroup";
 import FormSubmitButton from "./FormSubmitButton";
-import { Button } from "@/components/ui/button";
 
 // Schema definition
 const applicationSchema = z.object({
@@ -33,8 +32,6 @@ interface ApplicationFormProps {
     app_id?: string;
     app_secret?: string;
   };
-  onToggleStatus?: () => void;
-  isActive?: boolean;
 }
 
 const ApplicationForm = ({
@@ -43,8 +40,6 @@ const ApplicationForm = ({
   isEditing = false,
   isSubmitting = false,
   appCredentials,
-  onToggleStatus,
-  isActive,
 }: ApplicationFormProps) => {
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationSchema),
@@ -157,23 +152,12 @@ const ApplicationForm = ({
           />
         </div>
 
-        {/* Submit and Toggle Status Buttons */}
+        {/* Submit Button */}
         <div className="flex justify-between items-center pt-4">
           <FormSubmitButton 
             isSubmitting={isSubmitting}
             isEditing={isEditing}
           />
-          
-          {isEditing && onToggleStatus && (
-            <Button
-              type="button"
-              variant={isActive ? "destructive" : "outline"}
-              onClick={onToggleStatus}
-              disabled={isSubmitting}
-            >
-              {isActive ? "Deactivate" : "Activate"} Application
-            </Button>
-          )}
         </div>
       </form>
     </Form>

@@ -20,7 +20,6 @@ import { Plus, RefreshCcw } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { getApplicationColumns } from "@/components/applications/ApplicationColumns";
 import ApplicationForm from "@/components/applications/ApplicationForm";
-import StatusDialog from "@/components/applications/StatusDialog";
 import { useApplications } from "@/hooks/useApplications";
 
 const Applications = () => {
@@ -28,31 +27,19 @@ const Applications = () => {
     applications,
     isLoading,
     editingApp,
-    isStatusDialogOpen,
-    newStatus,
     isDialogOpen,
     setSearchTerm,
     setIsDialogOpen,
     setEditingApp,
-    setIsStatusDialogOpen,
     fetchApps,
     handleCreateApplication,
     handleUpdateApplication,
-    handleToggleStatus,
-    openStatusDialog,
     isSubmitting
   } = useApplications();
 
   const columns = getApplicationColumns({
     onEditApplication: setEditingApp,
   });
-
-  // Function to open status dialog from the edit form
-  const handleOpenStatusDialog = () => {
-    if (editingApp) {
-      openStatusDialog(editingApp.id, !editingApp.is_active);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -137,20 +124,10 @@ const Applications = () => {
                 app_id: editingApp.app_id,
                 app_secret: editingApp.app_secret
               }}
-              onToggleStatus={handleOpenStatusDialog}
-              isActive={editingApp.is_active}
             />
           </DialogContent>
         </Dialog>
       )}
-
-      {/* Status Toggle Dialog */}
-      <StatusDialog
-        isOpen={isStatusDialogOpen}
-        onOpenChange={setIsStatusDialogOpen}
-        onConfirm={handleToggleStatus}
-        newStatus={newStatus}
-      />
     </div>
   );
 };
