@@ -70,17 +70,21 @@ export async function updateAppWithAPI(id: string, data: ApplicationFormValues):
 
 export async function updateAppWithEdgeFunction(id: string, data: ApplicationFormValues): Promise<{ success: boolean }> {
   try {
-    const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
-      method: 'PUT',
+    console.log("Attempting to update with Edge Function", { id, ...data });
+    const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/update-app', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, ...data })
     });
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Edge Function update error:", errorText);
       return { success: false };
     }
     
-    await response.json();
+    const result = await response.json();
+    console.log("Edge Function update response:", result);
     
     return { success: true };
   } catch (error) {
@@ -107,8 +111,8 @@ export async function toggleStatusWithAPI(id: string, isActive: boolean): Promis
 
 export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean): Promise<{ success: boolean }> {
   try {
-    const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
-      method: 'PUT',
+    const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/toggle-app-status', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, is_active: isActive })
     });
