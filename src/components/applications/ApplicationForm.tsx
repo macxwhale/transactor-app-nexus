@@ -8,7 +8,6 @@ import AppCredentialsSection from "./AppCredentialsSection";
 import FormFieldGroup from "./FormFieldGroup";
 import FormSubmitButton from "./FormSubmitButton";
 import { Button } from "@/components/ui/button";
-import { Toggle } from "lucide-react";
 
 // Schema definition
 const applicationSchema = z.object({
