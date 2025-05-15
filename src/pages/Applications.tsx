@@ -20,6 +20,7 @@ import { Plus, RefreshCcw } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { getApplicationColumns } from "@/components/applications/ApplicationColumns";
 import ApplicationForm from "@/components/applications/ApplicationForm";
+import StatusDialog from "@/components/applications/StatusDialog";
 import { useApplications } from "@/hooks/useApplications";
 
 const Applications = () => {
@@ -27,18 +28,24 @@ const Applications = () => {
     applications,
     isLoading,
     editingApp,
+    isStatusDialogOpen,
+    newStatus,
     isDialogOpen,
     setSearchTerm,
     setIsDialogOpen,
     setEditingApp,
+    setIsStatusDialogOpen,
     fetchApps,
     handleCreateApplication,
     handleUpdateApplication,
+    handleToggleStatus,
+    openStatusDialog,
     isSubmitting
   } = useApplications();
 
   const columns = getApplicationColumns({
     onEditApplication: setEditingApp,
+    onToggleStatus: openStatusDialog,
   });
 
   return (
@@ -128,6 +135,14 @@ const Applications = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Status Toggle Dialog */}
+      <StatusDialog
+        isOpen={isStatusDialogOpen}
+        onOpenChange={setIsStatusDialogOpen}
+        onConfirm={handleToggleStatus}
+        newStatus={newStatus}
+      />
     </div>
   );
 };
