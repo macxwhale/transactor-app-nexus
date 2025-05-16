@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
-export type StatusType = 'success' | 'pending' | 'failed' | 'inactive' | 'active' | 'completed';
+export type StatusType = 'success' | 'pending' | 'failed' | 'inactive' | 'active' | 'completed' | 'processing';
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -24,6 +24,10 @@ export function StatusBadge({ status, text, className }: StatusBadgeProps) {
     pending: {
       variant: "warning" as const,
       label: text || "Pending",
+    },
+    processing: {
+      variant: "warning" as const,
+      label: text || "Processing",
     },
     failed: {
       variant: "destructive" as const,

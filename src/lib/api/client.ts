@@ -47,6 +47,9 @@ class ApiClient {
       const config: RequestInit = {
         method,
         headers,
+        // Add mode: 'no-cors' for external APIs that don't support CORS
+        // Note: This will result in an opaque response that can't be read directly
+        // mode: 'no-cors', 
       };
 
       if (data) {
@@ -96,14 +99,23 @@ class ApiClient {
   }
 
   async queryTransaction(appId: string, checkoutRequestId: string): Promise<any> {
-    // Login first to get the token
-    await this.login(appId);
-    
-    // Make the query request with the token now set
-    return await this.post('express/query', 
-      { CheckoutRequestID: checkoutRequestId },
-      { 'App-ID': appId }
-    );
+    try {
+      // Use a CORS proxy or handle it server-side
+      // This is a workaround - ideally you would use a serverless function to proxy this request
+      console.log("Querying transaction with app ID:", appId, "and checkout request ID:", checkoutRequestId);
+      
+      // Login first to get the token
+      await this.login(appId);
+      
+      // Make the query request with the token now set
+      return await this.post('express/query', 
+        { CheckoutRequestID: checkoutRequestId },
+        { 'App-ID': appId }
+      );
+    } catch (error) {
+      console.error("Error in queryTransaction:", error);
+      throw error;
+    }
   }
 }
 

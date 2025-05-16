@@ -26,7 +26,7 @@ export interface Transaction {
   mpesa_receipt_number: string;
   phone_number: string;
   amount: number;
-  status: 'pending' | 'completed' | 'failed';
+  status: 'pending' | 'completed' | 'failed' | 'processing';
   transaction_date: string;
   application_id: string;
   application_name?: string;

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Transaction, queryTransaction } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -100,7 +101,7 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
       header: "",
       cell: (tx: Transaction) => (
         <div className="flex justify-end space-x-2">
-          {tx.checkout_request_id && tx.status === 'pending' && (
+          {tx.checkout_request_id && (tx.status === 'pending' || tx.status === 'processing') && (
             <Button
               variant="outline"
               size="sm"

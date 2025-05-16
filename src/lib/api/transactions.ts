@@ -42,11 +42,28 @@ export async function queryTransaction(tx: Transaction): Promise<any> {
       return null;
     }
     
+    // Log the URL being used - helps with debugging
+    console.log("Using API domain:", apiDomain);
     apiClient.setBaseUrl(apiDomain);
-    const result = await apiClient.queryTransaction(tx.application_id, tx.checkout_request_id);
-    return result;
+    
+    // Since we're likely hitting CORS issues, let's add better error handling
+    try {
+      const result = await apiClient.queryTransaction(tx.application_id, tx.checkout_request_id);
+      console.log("Transaction query successful:", result);
+      return result;
+    } catch (error) {
+      console.error("Error querying transaction:", error);
+      
+      // More user-friendly error message
+      if (error instanceof Error && error.message.includes("CORS")) {
+        toast.error("Unable to connect to the payment server due to CORS restrictions. Please contact your administrator.");
+      } else {
+        toast.error("Failed to query transaction. Please try again later.");
+      }
+      return null;
+    }
   } catch (error) {
-    console.error("Error querying transaction:", error);
+    console.error("Error in queryTransaction outer block:", error);
     return null;
   }
 }
