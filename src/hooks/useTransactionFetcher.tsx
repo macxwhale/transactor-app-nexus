@@ -47,8 +47,9 @@ export function useTransactionFetcher(applications: Application[]) {
       // First, get total count using a separate query
       const countQuery = buildFilteredQuery(filters, searchTerm);
       
-      // Type the count response properly
-      const { data: countData, error: countError }: PostgrestSingleResponse<{ count: number }[]> = await countQuery.count();
+      // Execute the count query and explicitly cast the response type
+      const countResponse: PostgrestSingleResponse<{ count: number }[]> = await countQuery.count();
+      const { data: countData, error: countError } = countResponse;
       
       if (countError) {
         throw countError;
