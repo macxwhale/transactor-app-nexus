@@ -50,9 +50,10 @@ export function TransactionFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="Completed">Completed</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Failed">Failed</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="processing">Processing</SelectItem>
+            <SelectItem value="failed">Failed</SelectItem>
           </SelectContent>
         </Select>
       </div>

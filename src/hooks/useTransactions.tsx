@@ -8,7 +8,14 @@ export function useTransactions() {
   const { applications } = useApplicationsList();
   const { searchTerm, filters, setSearchTerm, setFilters } = useTransactionFilters();
   const { currentPage, totalPages, setCurrentPage } = usePagination();
-  const { transactions, isLoading, selectedTx, setSelectedTx, fetchData } = useTransactionData();
+  const { 
+    transactions, 
+    isLoading, 
+    selectedTx, 
+    setSelectedTx, 
+    fetchData,
+    error
+  } = useTransactionData();
 
   return {
     transactions,
@@ -18,6 +25,7 @@ export function useTransactions() {
     totalPages,
     selectedTx,
     filters,
+    error,
     setCurrentPage,
     setSearchTerm,
     setFilters,

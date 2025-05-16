@@ -13,6 +13,7 @@ const Transactions = () => {
     totalPages,
     selectedTx,
     filters,
+    error,
     setCurrentPage,
     setSearchTerm,
     setFilters,
@@ -33,6 +34,7 @@ const Transactions = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         filters={filters}
+        error={error}
         onPageChange={setCurrentPage}
         onSearch={setSearchTerm}
         onFilterChange={(newFilters) => {

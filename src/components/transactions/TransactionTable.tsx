@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,7 @@ interface TransactionTableProps {
   onFilterChange: (filters: any) => void;
   onRefresh: () => void;
   onViewDetails: (tx: Transaction) => void;
+  error?: string | null;
 }
 
 export function TransactionTable({
@@ -46,6 +48,7 @@ export function TransactionTable({
   onFilterChange,
   onRefresh,
   onViewDetails,
+  error,
 }: TransactionTableProps) {
   const columns = getTransactionColumns(onViewDetails);
 
@@ -57,7 +60,8 @@ export function TransactionTable({
       let query = supabase.from('transactions').select('*');
       
       if (filters.status) {
-        query = query.eq('status', filters.status);
+        // Use case-insensitive matching for status
+        query = query.ilike('status', `%${filters.status}%`);
       }
       
       if (filters.applicationId) {
@@ -91,7 +95,7 @@ export function TransactionTable({
         Phone: tx.phone_number,
         Amount: tx.amount,
         Status: tx.status,
-        Date: new Date(tx.transaction_date).toLocaleDateString(),
+        Date: tx.transaction_date ? new Date(Number(tx.transaction_date)).toLocaleDateString() : 'N/A',
         Application: applications.find(app => app.id === tx.app_id)?.name || tx.app_id,
         Reference: tx.account_reference,
         Description: tx.transaction_desc
@@ -139,7 +143,7 @@ export function TransactionTable({
             onClick={onRefresh}
             disabled={isLoading}
           >
-            <RefreshCcw className="h-4 w-4" />
+            <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Button
@@ -160,6 +164,12 @@ export function TransactionTable({
           applications={applications}
           onFilterChange={onFilterChange}
         />
+
+        {error && (
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive rounded-md text-destructive">
+            {error}
+          </div>
+        )}
 
         <DataTable
           data={transactions}

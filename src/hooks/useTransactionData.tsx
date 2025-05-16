@@ -11,22 +11,43 @@ export function useTransactionData() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const { applications } = useApplicationsList();
   const { searchTerm, filters } = useTransactionFilters();
   const { currentPage, setTotalPages } = usePagination();
   
+  // Helper function to normalize status values
+  const normalizeStatus = (status: string | null): 'pending' | 'completed' | 'failed' | 'processing' => {
+    if (!status) return 'pending';
+    
+    // Convert to lowercase for consistent comparison
+    const lowercaseStatus = status.toLowerCase();
+    
+    if (lowercaseStatus.includes('pend')) return 'pending';
+    if (lowercaseStatus.includes('complet')) return 'completed';
+    if (lowercaseStatus.includes('fail')) return 'failed';
+    if (lowercaseStatus.includes('process')) return 'processing';
+    
+    // Default to pending if unknown status
+    console.warn(`Unknown status encountered: ${status}, defaulting to 'pending'`);
+    return 'pending';
+  };
+  
   const fetchData = async () => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       // Build query for transactions
       let query = supabase
         .from('transactions')
         .select('*', { count: 'exact' });
       
-      // Apply filters
+      // Apply filters with case-insensitive status matching
       if (filters.status) {
-        query = query.eq('status', filters.status);
+        // Use ilike for case-insensitive comparison
+        query = query.ilike('status', `%${filters.status}%`);
       }
       
       if (filters.applicationId) {
@@ -68,7 +89,7 @@ export function useTransactionData() {
           mpesa_receipt_number: tx.mpesa_receipt_number || '',
           phone_number: tx.phone_number,
           amount: Number(tx.amount),
-          status: tx.status?.toLowerCase() as 'pending' | 'completed' | 'failed',
+          status: normalizeStatus(tx.status),
           transaction_date: tx.transaction_date ? tx.transaction_date.toString() : '',
           application_id: tx.app_id,
           application_name: applications.find(app => app.id === tx.app_id)?.name || `App ID: ${tx.app_id}`,
@@ -95,6 +116,7 @@ export function useTransactionData() {
       
     } catch (error) {
       console.error("Failed to fetch data:", error);
+      setError("Failed to fetch transaction data");
       toast.error("Failed to fetch data. Please try again.");
     } finally {
       setIsLoading(false);
@@ -102,12 +124,18 @@ export function useTransactionData() {
   };
 
   useEffect(() => {
-    fetchData();
+    // Add a small debounce for search term to reduce flickering
+    const searchTimer = setTimeout(() => {
+      fetchData();
+    }, searchTerm ? 300 : 0); // Only add delay for search to prevent initial load delay
+    
+    return () => clearTimeout(searchTimer);
   }, [currentPage, searchTerm, filters, applications]);
 
   return {
     transactions,
     isLoading,
+    error,
     selectedTx,
     setSelectedTx,
     fetchData
