@@ -44,16 +44,17 @@ export function useTransactionFetcher(applications: Application[]) {
       // Update refs to current values
       updateRefs(filters, searchTerm, currentPage);
       
-      // Get total count using the count method
+      // Get total count using the select method with count option
       const countQuery = buildFilteredQuery(filters, searchTerm);
-      const { count, error: countError } = await countQuery.count();
+      const { data: countData, error: countError } = await countQuery.select('*', { count: 'exact', head: true });
       
       if (countError) {
         throw countError;
       }
       
-      // Use the count value directly from the response
-      const totalItems = count || 0;
+      // Extract the count from the response metadata
+      const totalItems = countData?.length ? countData.length : 0;
+      const totalCount = countQuery.count;
       
       console.log(`Total matching records before pagination: ${totalItems}`);
       
