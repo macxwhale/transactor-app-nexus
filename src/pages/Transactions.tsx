@@ -10,10 +10,6 @@ const Transactions = () => {
     applications,
     isLoading,
     selectedTx,
-    filters,
-    error,
-    setSearchTerm,
-    setFilters,
     setSelectedTx,
     fetchData
   } = useTransactions();
@@ -39,10 +35,7 @@ const Transactions = () => {
         transactions={transactions}
         applications={applications}
         isLoading={isLoading}
-        filters={filters}
-        error={error}
-        onSearch={setSearchTerm}
-        onFilterChange={setFilters}
+        error={null}
         onRefresh={() => {
           fetchData();
         }}
