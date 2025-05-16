@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { VALID_STATUSES } from "@/utils/transactionUtils";
 
@@ -87,6 +87,7 @@ export function useTransactionQueries() {
     }
     
     if (searchTerm) {
+      // Use OR filter for searching in different fields
       query = query.or(`mpesa_receipt_number.ilike.%${searchTerm}%,phone_number.ilike.%${searchTerm}%`);
       console.log(`Adding search filter: ${searchTerm}`);
     }

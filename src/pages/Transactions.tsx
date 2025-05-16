@@ -25,7 +25,12 @@ const Transactions = () => {
   // Force initial fetch when component mounts
   useEffect(() => {
     console.log("Transactions page mounted, fetching data...");
-    fetchData();
+    // Small delay to ensure all hooks are initialized
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -47,6 +52,7 @@ const Transactions = () => {
         onSearch={setSearchTerm}
         onFilterChange={setFilters}
         onRefresh={() => {
+          // Reset to first page when manually refreshing
           setCurrentPage(1);
           fetchData();
         }}

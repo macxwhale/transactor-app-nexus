@@ -51,8 +51,9 @@ export function useTransactionFetcher(applications: Application[]) {
         throw countError;
       }
       
-      // Access the count from countData (it's an array with a single object that has a count property)
-      const totalItems = countData?.[0]?.count || 0;
+      // Access the count from countData (Supabase count returns an array with a single object containing count)
+      const count = countData?.[0]?.count ?? 0;
+      const totalItems = typeof count === 'number' ? count : parseInt(count as string, 10) || 0;
       
       console.log(`Total matching records before pagination: ${totalItems}`);
       
@@ -86,8 +87,15 @@ export function useTransactionFetcher(applications: Application[]) {
 
       console.log(`Fetched transactions: ${txData?.length || 0} out of ${totalItems} total`);
       
+      if (!txData || txData.length === 0) {
+        console.log("No transactions found in this range");
+        setTransactions([]);
+        setIsLoading(false);
+        return;
+      }
+      
       // Convert Supabase transactions data to our Transaction type
-      const formattedTransactions: Transaction[] = txData?.map(tx => {
+      const formattedTransactions: Transaction[] = txData.map(tx => {
         // Ensure proper type conversion and handle nulls
         const status = normalizeStatus(tx.status);
         

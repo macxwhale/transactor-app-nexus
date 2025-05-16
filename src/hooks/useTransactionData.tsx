@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Transaction } from "@/lib/api";
 import { useApplicationsList } from "./useApplicationsList";
 import { useTransactionFilters } from "./useTransactionFilters";
@@ -20,20 +20,26 @@ export function useTransactionData() {
     fetchTransactions
   } = useTransactionFetcher(applications);
 
-  // Fetch data when filters, search, or page changes
+  // Memoize the fetchData function to prevent unnecessary rerenders
+  const fetchData = useCallback(() => {
+    if (applications.length > 0) { // Only fetch if applications are loaded
+      fetchTransactions(currentPage, searchTerm, filters, setTotalItems, setTotalPages);
+    }
+  }, [currentPage, searchTerm, filters, applications, fetchTransactions, setTotalItems, setTotalPages]);
+
+  // Fetch data when filters, search, or page changes, but only if applications are loaded
   useEffect(() => {
+    if (applications.length === 0) {
+      return; // Don't try to fetch if no applications loaded yet
+    }
+    
     // Create a debounce mechanism for search
     const searchTimer = setTimeout(() => {
-      fetchTransactions(currentPage, searchTerm, filters, setTotalItems, setTotalPages);
+      fetchData();
     }, searchTerm ? 300 : 0);
     
     return () => clearTimeout(searchTimer);
-  }, [currentPage, searchTerm, filters.status, filters.applicationId, filters.startDate, filters.endDate, applications.length]);
-
-  // Wrapper function to allow manual refresh
-  const fetchData = () => {
-    fetchTransactions(currentPage, searchTerm, filters, setTotalItems, setTotalPages);
-  };
+  }, [currentPage, searchTerm, filters, applications.length, fetchData]);
 
   return {
     transactions,
