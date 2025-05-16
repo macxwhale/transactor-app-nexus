@@ -126,8 +126,9 @@ export function useTransactionData() {
       prevPageRef.current = currentPage;
       
       // First, get total count using a separate query
-      const countQuery = buildFilteredQuery();
-      const { count: totalCount, error: countError } = await countQuery.count();
+      // Fix: Use the count() method correctly by calling it with .select('count')
+      const { count: totalCount, error: countError } = await buildFilteredQuery()
+        .select('count', { count: 'exact', head: true });
       
       if (countError) {
         throw countError;
