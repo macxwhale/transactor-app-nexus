@@ -9,13 +9,9 @@ const Transactions = () => {
     transactions,
     applications,
     isLoading,
-    currentPage,
-    totalPages,
-    totalItems,
     selectedTx,
     filters,
     error,
-    setCurrentPage,
     setSearchTerm,
     setFilters,
     setSelectedTx,
@@ -31,7 +27,7 @@ const Transactions = () => {
     }, 100);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [fetchData]);
 
   return (
     <div className="space-y-6">
@@ -43,17 +39,11 @@ const Transactions = () => {
         transactions={transactions}
         applications={applications}
         isLoading={isLoading}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
         filters={filters}
         error={error}
-        onPageChange={setCurrentPage}
         onSearch={setSearchTerm}
         onFilterChange={setFilters}
         onRefresh={() => {
-          // Reset to first page when manually refreshing
-          setCurrentPage(1);
           fetchData();
         }}
         onViewDetails={setSelectedTx}
