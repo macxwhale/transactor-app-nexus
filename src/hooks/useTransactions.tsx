@@ -96,24 +96,15 @@ export function useTransactions() {
       
       // Convert Supabase transactions data to our Transaction type
       const formattedTransactions: Transaction[] = txData.map(tx => {
-        // Handle transaction_date properly
-        let formattedDate: string = '';
-        if (tx.transaction_date) {
-          // Check if it's in seconds (Unix timestamp) and convert to milliseconds if needed
-          const timestamp = typeof tx.transaction_date === 'number' 
-            ? (tx.transaction_date < 10000000000 ? tx.transaction_date * 1000 : tx.transaction_date)
-            : tx.transaction_date;
-          
-          formattedDate = new Date(timestamp).toISOString();
-        }
-        
+        // Pass transaction_date directly to formatDate function without conversion
+        // The utils.formatDate function will now handle different date formats
         return {
           id: tx.id,
           mpesa_receipt_number: tx.mpesa_receipt_number || '',
           phone_number: tx.phone_number,
           amount: Number(tx.amount),
           status: tx.status?.toLowerCase() as 'pending' | 'completed' | 'failed',
-          transaction_date: formattedDate,
+          transaction_date: tx.transaction_date ? tx.transaction_date.toString() : '',
           application_id: tx.app_id,
           application_name: formattedApps.find(app => app.id === tx.app_id)?.name || `App ID: ${tx.app_id}`,
           created_at: new Date(tx.created_at).toISOString(),

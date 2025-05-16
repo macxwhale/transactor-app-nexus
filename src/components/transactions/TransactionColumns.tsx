@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Transaction } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -53,7 +52,14 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
     {
       id: "date",
       header: "Transaction Date",
-      cell: (tx: Transaction) => displayValue(tx.transaction_date, formatDate),
+      cell: (tx: Transaction) => {
+        // Convert to number if it's a string representation of a number
+        const dateValue = tx.transaction_date && !isNaN(Number(tx.transaction_date)) 
+          ? Number(tx.transaction_date) 
+          : tx.transaction_date;
+        
+        return displayValue(dateValue, formatDate);
+      },
     },
     {
       id: "application",
