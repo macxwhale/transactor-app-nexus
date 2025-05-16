@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 
 interface ApiConfig {
@@ -7,6 +6,7 @@ interface ApiConfig {
 
 class ApiClient {
   private baseUrl: string;
+  private authToken: string | null = null;
 
   constructor(config: ApiConfig = {}) {
     this.baseUrl = config.baseUrl || '';
@@ -19,6 +19,10 @@ class ApiClient {
 
   getBaseUrl(): string {
     return this.baseUrl;
+  }
+
+  setAuthToken(token: string) {
+    this.authToken = token;
   }
 
   async request<T>(
@@ -34,6 +38,10 @@ class ApiClient {
         'Content-Type': 'application/json',
         ...customHeaders,
       };
+
+      if (this.authToken) {
+        headers['Authorization'] = `Bearer ${this.authToken}`;
+      }
 
       const config: RequestInit = {
         method,
@@ -78,6 +86,23 @@ class ApiClient {
 
   async delete<T>(endpoint: string, customHeaders?: Record<string, string>): Promise<T> {
     return this.request<T>(endpoint, 'DELETE', undefined, customHeaders);
+  }
+
+  async login(appId: string): Promise<string> {
+    const response = await this.post<{ token: string }>('login', { app_id: appId });
+    this.setAuthToken(response.token);
+    return response.token;
+  }
+
+  async queryTransaction(appId: string, checkoutRequestId: string): Promise<any> {
+    // Login first to get the token
+    await this.login(appId);
+    
+    // Make the query request with the token now set
+    return await this.post('express/query', 
+      { CheckoutRequestID: checkoutRequestId },
+      { 'App-ID': appId }
+    );
   }
 }
 
@@ -204,4 +229,27 @@ export async function fetchDashboardStats(): Promise<{
 }> {
   const response = await apiClient.get<ApiResponse<any>>('stats/dashboard');
   return response.data;
+}
+
+export async function queryTransaction(tx: Transaction): Promise<any> {
+  try {
+    if (!tx.checkout_request_id || !tx.application_id) {
+      toast.error("Missing required transaction information");
+      return null;
+    }
+    
+    // Get API domain from localStorage
+    const apiDomain = localStorage.getItem("apiDomain");
+    if (!apiDomain) {
+      toast.error("API domain not configured");
+      return null;
+    }
+    
+    apiClient.setBaseUrl(apiDomain);
+    const result = await apiClient.queryTransaction(tx.application_id, tx.checkout_request_id);
+    return result;
+  } catch (error) {
+    console.error("Error querying transaction:", error);
+    return null;
+  }
 }

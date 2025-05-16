@@ -1,8 +1,12 @@
+
 import React from "react";
 import { Transaction } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, StatusType } from "@/components/ui/StatusBadge";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { queryTransaction } from "@/lib/api";
+import { toast } from "sonner";
+import { Search } from "lucide-react";
 
 export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) {
   // Helper function to display N/A for null or undefined values
@@ -11,6 +15,28 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
       return "N/A";
     }
     return formatter ? formatter(value) : value;
+  };
+
+  // Handle query transaction
+  const handleQueryTransaction = async (tx: Transaction) => {
+    toast.loading("Querying transaction...");
+    
+    try {
+      const result = await queryTransaction(tx);
+      toast.dismiss();
+      
+      if (result) {
+        toast.success("Transaction query successful");
+        console.log("Transaction query result:", result);
+        // You could update the transaction details or show them in a modal here
+        onViewDetails({...tx, result_desc: result.ResultDesc || tx.result_desc});
+      } else {
+        toast.error("Failed to query transaction");
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error("Error querying transaction");
+    }
   };
 
   return [
@@ -75,7 +101,21 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
       id: "actions",
       header: "",
       cell: (tx: Transaction) => (
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-2">
+          {tx.checkout_request_id && tx.status === 'pending' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleQueryTransaction(tx);
+              }}
+              className="flex items-center gap-1"
+            >
+              <Search className="h-4 w-4" />
+              Query
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
