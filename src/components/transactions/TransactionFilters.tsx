@@ -35,6 +35,14 @@ export function TransactionFilters({
   applications,
   onFilterChange,
 }: TransactionFiltersProps) {
+  // Helper to ensure we don't trigger unnecessary re-renders
+  const handleFilterChange = (key: string, value: string) => {
+    // Only update if the value has changed
+    if (filters[key as keyof FiltersState] !== value) {
+      onFilterChange({ ...filters, [key]: value });
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
       <div className="w-full md:w-1/4">
@@ -42,7 +50,7 @@ export function TransactionFilters({
         <Select
           value={filters.status}
           onValueChange={(value) => {
-            onFilterChange({ ...filters, status: value === "all" ? "" : value });
+            handleFilterChange("status", value === "all" ? "" : value);
           }}
         >
           <SelectTrigger>
@@ -62,7 +70,7 @@ export function TransactionFilters({
         <Select
           value={filters.applicationId}
           onValueChange={(value) => {
-            onFilterChange({ ...filters, applicationId: value === "all" ? "" : value });
+            handleFilterChange("applicationId", value === "all" ? "" : value);
           }}
         >
           <SelectTrigger>
@@ -98,10 +106,10 @@ export function TransactionFilters({
               mode="single"
               selected={filters.startDate ? new Date(filters.startDate) : undefined}
               onSelect={(date) => {
-                onFilterChange({
-                  ...filters,
-                  startDate: date ? format(date, "yyyy-MM-dd") : "",
-                });
+                handleFilterChange(
+                  "startDate",
+                  date ? format(date, "yyyy-MM-dd") : ""
+                );
               }}
               initialFocus
               className="p-3 pointer-events-auto"
@@ -129,10 +137,10 @@ export function TransactionFilters({
               mode="single"
               selected={filters.endDate ? new Date(filters.endDate) : undefined}
               onSelect={(date) => {
-                onFilterChange({
-                  ...filters,
-                  endDate: date ? format(date, "yyyy-MM-dd") : "",
-                });
+                handleFilterChange(
+                  "endDate",
+                  date ? format(date, "yyyy-MM-dd") : ""
+                );
               }}
               initialFocus
               className="p-3 pointer-events-auto"

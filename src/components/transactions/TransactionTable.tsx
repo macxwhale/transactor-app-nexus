@@ -69,8 +69,9 @@ export function TransactionTable({
       }
       
       if (filters.startDate) {
-        const startDate = new Date(filters.startDate).getTime();
-        query = query.gte('transaction_date', startDate);
+        const startDate = new Date(filters.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        query = query.gte('transaction_date', startDate.getTime());
       }
       
       if (filters.endDate) {
@@ -90,16 +91,31 @@ export function TransactionTable({
       }
       
       // Transform data for CSV
-      const csvData = data.map(tx => ({
-        Receipt: tx.mpesa_receipt_number || '',
-        Phone: tx.phone_number,
-        Amount: tx.amount,
-        Status: tx.status,
-        Date: tx.transaction_date ? new Date(Number(tx.transaction_date)).toLocaleDateString() : 'N/A',
-        Application: applications.find(app => app.id === tx.app_id)?.name || tx.app_id,
-        Reference: tx.account_reference,
-        Description: tx.transaction_desc
-      }));
+      const csvData = data.map(tx => {
+        // Get application name
+        const appName = applications.find(app => app.id === tx.app_id)?.name || tx.app_id;
+        
+        // Format the date properly
+        let formattedDate = 'N/A';
+        if (tx.transaction_date) {
+          try {
+            formattedDate = new Date(Number(tx.transaction_date)).toLocaleDateString();
+          } catch (e) {
+            console.error("Error formatting date:", e);
+          }
+        }
+        
+        return {
+          Receipt: tx.mpesa_receipt_number || '',
+          Phone: tx.phone_number || '',
+          Amount: tx.amount || 0,
+          Status: tx.status || 'Unknown',
+          Date: formattedDate,
+          Application: appName,
+          Reference: tx.account_reference || '',
+          Description: tx.transaction_desc || ''
+        };
+      });
       
       // Convert to CSV
       const headers = Object.keys(csvData[0]).join(',');

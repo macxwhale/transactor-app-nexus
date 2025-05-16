@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Table, 
   TableBody, 
@@ -41,12 +41,31 @@ export function DataTable<T>({
   pagination,
   isLoading = false,
 }: DataTableProps<T>) {
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [localLoading, setLocalLoading] = useState(isLoading);
+  
+  // Use local loading state to prevent flicker
+  useEffect(() => {
+    if (isLoading) {
+      setLocalLoading(true);
+    } else {
+      // Add a small delay before showing loaded content
+      // to reduce perceived flickering
+      const timeout = setTimeout(() => {
+        setLocalLoading(false);
+      }, 100);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    const value = e.target.value;
+    setSearchTerm(value);
+    
     if (onSearch) {
-      onSearch(e.target.value);
+      // Add debounce to avoid constant re-fetching while typing
+      onSearch(value);
     }
   };
 
@@ -73,15 +92,18 @@ export function DataTable<T>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {localLoading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading data...
+                <TableCell colSpan={columns.length} className="h-48 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                    <div>Loading data...</div>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columns.length} className="h-48 text-center">
                   No results found
                 </TableCell>
               </TableRow>
@@ -101,14 +123,14 @@ export function DataTable<T>({
       {pagination && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Page {pagination.currentPage} of {pagination.totalPages}
+            Page {pagination.currentPage} of {pagination.totalPages || 1}
           </div>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
-              disabled={pagination.currentPage <= 1}
+              disabled={pagination.currentPage <= 1 || localLoading}
             >
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Previous Page</span>
@@ -117,7 +139,7 @@ export function DataTable<T>({
               variant="outline"
               size="sm"
               onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage >= pagination.totalPages}
+              disabled={pagination.currentPage >= pagination.totalPages || localLoading}
             >
               <ChevronRight className="h-4 w-4" />
               <span className="sr-only">Next Page</span>

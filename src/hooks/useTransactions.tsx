@@ -3,6 +3,7 @@ import { useApplicationsList } from "./useApplicationsList";
 import { useTransactionFilters } from "./useTransactionFilters";
 import { usePagination } from "./usePagination";
 import { useTransactionData } from "./useTransactionData";
+import { useCallback } from "react";
 
 export function useTransactions() {
   const { applications } = useApplicationsList();
@@ -17,6 +18,12 @@ export function useTransactions() {
     error
   } = useTransactionData();
 
+  // Memoize the filter change handler to prevent unnecessary rerenders
+  const handleFilterChange = useCallback((newFilters: any) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [setFilters, setCurrentPage]);
+
   return {
     transactions,
     applications,
@@ -28,7 +35,7 @@ export function useTransactions() {
     error,
     setCurrentPage,
     setSearchTerm,
-    setFilters,
+    setFilters: handleFilterChange,
     setSelectedTx,
     fetchData
   };

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { TransactionDetailsDialog } from "@/components/transactions/TransactionDetailsDialog";
@@ -21,6 +21,11 @@ const Transactions = () => {
     fetchData
   } = useTransactions();
 
+  // Force initial fetch when component mounts
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -37,10 +42,7 @@ const Transactions = () => {
         error={error}
         onPageChange={setCurrentPage}
         onSearch={setSearchTerm}
-        onFilterChange={(newFilters) => {
-          setFilters(newFilters);
-          setCurrentPage(1);
-        }}
+        onFilterChange={setFilters}
         onRefresh={() => {
           setCurrentPage(1);
           fetchData();
