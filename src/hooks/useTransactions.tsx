@@ -31,7 +31,7 @@ export function useTransactions() {
     isLoading,
     currentPage,
     totalPages,
-    totalItems, // Now passing the totalItems property
+    totalItems,
     selectedTx,
     filters,
     error,
