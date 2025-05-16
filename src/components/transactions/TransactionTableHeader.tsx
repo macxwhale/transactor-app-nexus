@@ -9,14 +9,12 @@ import {
 import { Download, RefreshCcw } from "lucide-react";
 
 interface TransactionTableHeaderProps {
-  totalItems?: number;
   onRefresh: () => void;
   onExport: () => void;
   isLoading: boolean;
 }
 
 export function TransactionTableHeader({
-  totalItems,
   onRefresh,
   onExport,
   isLoading,
@@ -27,9 +25,6 @@ export function TransactionTableHeader({
         <CardTitle>Transaction History</CardTitle>
         <CardDescription>
           View and filter all your M-Pesa transactions
-          {totalItems !== undefined && (
-            <span className="ml-1">({totalItems} total records)</span>
-          )}
         </CardDescription>
       </div>
       <div className="flex gap-3">

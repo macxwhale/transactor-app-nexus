@@ -3,9 +3,6 @@ import { useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { VALID_STATUSES } from "@/utils/transactionUtils";
 
-// Number of transactions to display per page
-export const PER_PAGE = 10;
-
 interface TransactionFilters {
   status: string;
   applicationId: string;
@@ -14,39 +11,6 @@ interface TransactionFilters {
 }
 
 export function useTransactionQueries() {
-  const prevFiltersRef = useRef<TransactionFilters | null>(null);
-  const prevSearchRef = useRef<string>('');
-  const prevPageRef = useRef<number>(1);
-  
-  // Check if filters or search have actually changed
-  const filtersChanged = (
-    currentFilters: TransactionFilters,
-    currentSearch: string,
-    currentPage: number
-  ) => {
-    if (!prevFiltersRef.current) return true;
-    
-    return (
-      prevFiltersRef.current.status !== currentFilters.status ||
-      prevFiltersRef.current.applicationId !== currentFilters.applicationId ||
-      prevFiltersRef.current.startDate !== currentFilters.startDate ||
-      prevFiltersRef.current.endDate !== currentFilters.endDate ||
-      prevSearchRef.current !== currentSearch ||
-      prevPageRef.current !== currentPage
-    );
-  };
-  
-  // Update the refs to current values
-  const updateRefs = (
-    currentFilters: TransactionFilters,
-    currentSearch: string,
-    currentPage: number
-  ) => {
-    prevFiltersRef.current = {...currentFilters};
-    prevSearchRef.current = currentSearch;
-    prevPageRef.current = currentPage;
-  };
-  
   // Helper function to build a query with all the necessary filters
   const buildFilteredQuery = (filters: TransactionFilters, searchTerm: string) => {
     // Build query for transactions
@@ -96,9 +60,6 @@ export function useTransactionQueries() {
   };
   
   return {
-    filtersChanged,
-    updateRefs,
-    buildFilteredQuery,
-    PER_PAGE
+    buildFilteredQuery
   };
 }

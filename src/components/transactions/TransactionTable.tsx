@@ -16,16 +16,12 @@ interface TransactionTableProps {
   transactions: Transaction[];
   applications: Application[];
   isLoading: boolean;
-  currentPage: number;
-  totalPages: number;
-  totalItems?: number;
   filters: {
     status: string;
     applicationId: string;
     startDate: string;
     endDate: string;
   };
-  onPageChange: (page: number) => void;
   onSearch: (term: string) => void;
   onFilterChange: (filters: any) => void;
   onRefresh: () => void;
@@ -37,11 +33,7 @@ export function TransactionTable({
   transactions,
   applications,
   isLoading,
-  currentPage,
-  totalPages,
-  totalItems,
   filters,
-  onPageChange,
   onSearch,
   onFilterChange,
   onRefresh,
@@ -57,7 +49,6 @@ export function TransactionTable({
   return (
     <Card>
       <TransactionTableHeader 
-        totalItems={totalItems} 
         onRefresh={onRefresh} 
         onExport={handleExport} 
         isLoading={isLoading} 
@@ -77,12 +68,6 @@ export function TransactionTable({
           columns={columns}
           searchPlaceholder="Search by receipt number or phone..."
           onSearch={onSearch}
-          pagination={{
-            currentPage,
-            totalPages,
-            totalItems,
-            onPageChange,
-          }}
           isLoading={isLoading}
         />
       </CardContent>

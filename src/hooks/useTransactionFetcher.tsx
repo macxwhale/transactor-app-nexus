@@ -4,35 +4,24 @@ import { Transaction, Application } from "@/lib/api";
 import { toast } from "sonner";
 import { normalizeStatus } from "@/utils/transactionUtils";
 import { useTransactionQueries } from "./useTransactionQueries";
-import { PostgrestResponse } from "@supabase/supabase-js";
 
 export function useTransactionFetcher(applications: Application[]) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const { buildFilteredQuery, filtersChanged, updateRefs, PER_PAGE } = useTransactionQueries();
+  const { buildFilteredQuery } = useTransactionQueries();
   
   const fetchTransactions = async (
-    currentPage: number,
     searchTerm: string,
     filters: {
       status: string;
       applicationId: string;
       startDate: string;
       endDate: string;
-    },
-    setTotalItems: (count: number) => void,
-    setTotalPages: (pages: number) => void
-  ) => {
-    // Don't reload if nothing changed
-    if (!filtersChanged(filters, searchTerm, currentPage) && transactions.length > 0) {
-      console.log("No filter changes detected, skipping fetch");
-      return;
     }
-    
+  ) => {
     console.log("Fetching transactions with filters:", { 
-      page: currentPage,
       search: searchTerm, 
       filters
     });
@@ -41,57 +30,19 @@ export function useTransactionFetcher(applications: Application[]) {
     setError(null);
     
     try {
-      // Update refs to current values
-      updateRefs(filters, searchTerm, currentPage);
-      
-      // Get total count using proper approach for this version of Supabase
-      const countQuery = buildFilteredQuery(filters, searchTerm);
-      const { data: countData, error: countError } = await countQuery
-        .select('count', { count: 'exact' })
-        .limit(0);
-      
-      if (countError) {
-        throw countError;
-      }
-      
-      // Extract count from the response metadata
-      const countResponse = countData as unknown as { count?: number };
-      const totalItems = countResponse.count || 0;
-      
-      console.log(`Total matching records before pagination: ${totalItems}`);
-      
-      // Set total pages and items based on the count
-      const totalPages = Math.ceil(totalItems / PER_PAGE);
-      console.log(`Setting pagination: ${totalItems} total items, ${totalPages} total pages`);
-      
-      setTotalItems(totalItems);
-      setTotalPages(totalPages);
-      
-      if (totalItems === 0) {
-        // No need to fetch data if there are no matches
-        setTransactions([]);
-        setIsLoading(false);
-        return;
-      }
-      
-      // Then get the actual paginated data
-      const from = (currentPage - 1) * PER_PAGE;
-      const to = from + PER_PAGE - 1;
-      console.log(`Pagination: from ${from} to ${to} (page ${currentPage}, ${PER_PAGE} per page)`);
-      
+      // Build query for getting all transactions
       const dataQuery = buildFilteredQuery(filters, searchTerm);
       const { data: txData, error: txError } = await dataQuery
-        .range(from, to)
         .order('created_at', { ascending: false });
       
       if (txError) {
         throw txError;
       }
 
-      console.log(`Fetched transactions: ${txData?.length || 0} out of ${totalItems} total`);
+      console.log(`Fetched transactions: ${txData?.length || 0}`);
       
       if (!txData || txData.length === 0) {
-        console.log("No transactions found in this range");
+        console.log("No transactions found");
         setTransactions([]);
         setIsLoading(false);
         return;

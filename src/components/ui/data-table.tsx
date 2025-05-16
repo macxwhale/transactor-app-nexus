@@ -8,13 +8,8 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Search,
-} from "lucide-react";
+import { Search } from "lucide-react";
 
 interface DataTableProps<T> {
   data: T[];
@@ -25,12 +20,6 @@ interface DataTableProps<T> {
   }[];
   searchPlaceholder?: string;
   onSearch?: (searchTerm: string) => void;
-  pagination?: {
-    currentPage: number;
-    totalPages: number;
-    totalItems?: number; // New prop to display total items count
-    onPageChange: (page: number) => void;
-  };
   isLoading?: boolean;
 }
 
@@ -39,7 +28,6 @@ export function DataTable<T>({
   columns,
   searchPlaceholder = "Search...",
   onSearch,
-  pagination,
   isLoading = false,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,43 +108,6 @@ export function DataTable<T>({
           </TableBody>
         </Table>
       </div>
-
-      {pagination && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            {pagination.totalItems ? (
-              <>
-                Page {pagination.currentPage} of {pagination.totalPages || 1} 
-                <span className="ml-1">
-                  ({pagination.totalItems} total records)
-                </span>
-              </>
-            ) : (
-              <>Page {pagination.currentPage} of {pagination.totalPages || 1}</>
-            )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
-              disabled={pagination.currentPage <= 1 || localLoading}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous Page</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage >= pagination.totalPages || localLoading}
-            >
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Next Page</span>
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
