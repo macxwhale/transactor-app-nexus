@@ -10,11 +10,9 @@ export function useApplicationState() {
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredApplications = applications.filter(
-    app => app.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // No longer filter applications
+  const filteredApplications = applications;
 
   return {
     applications,
@@ -31,8 +29,6 @@ export function useApplicationState() {
     setNewStatus,
     isDialogOpen,
     setIsDialogOpen,
-    searchTerm,
-    setSearchTerm,
     filteredApplications
   };
 }

@@ -28,7 +28,6 @@ const Applications = () => {
     isLoading,
     editingApp,
     isDialogOpen,
-    setSearchTerm,
     setIsDialogOpen,
     setEditingApp,
     fetchApps,
@@ -95,8 +94,6 @@ const Applications = () => {
           <DataTable
             data={applications}
             columns={columns}
-            searchPlaceholder="Search applications..."
-            onSearch={setSearchTerm}
             isLoading={isLoading}
           />
         </CardContent>

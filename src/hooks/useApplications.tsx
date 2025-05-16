@@ -11,8 +11,6 @@ export function useApplications() {
     setApplications,
     isLoading,
     setIsLoading,
-    searchTerm,
-    setSearchTerm,
     filteredApplications
   } = useApplicationState();
 
@@ -51,8 +49,6 @@ export function useApplications() {
     isLoading,
     editingApp,
     isDialogOpen,
-    searchTerm,
-    setSearchTerm,
     setIsDialogOpen,
     setEditingApp,
     fetchApps,
