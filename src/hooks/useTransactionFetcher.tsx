@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { normalizeStatus } from "@/utils/transactionUtils";
 import { useTransactionQueries } from "./useTransactionQueries";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useTransactionFetcher(applications: Application[]) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -47,8 +48,10 @@ export function useTransactionFetcher(applications: Application[]) {
       // First, get total count using a separate query
       const countQuery = buildFilteredQuery(filters, searchTerm);
       
-      // Add type assertion to make TypeScript recognize the count method and its result type
-      const { data: countData, error: countError } = await countQuery.count() as PostgrestSingleResponse<{ count: number }[]>;
+      // Use proper type casting for the count query result
+      const { data: countData, error: countError } = await countQuery
+        .count()
+        .returns<{ count: number }[]>() as PostgrestSingleResponse<{ count: number }[]>;
       
       if (countError) {
         throw countError;
