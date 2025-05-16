@@ -52,7 +52,7 @@ export function getTransactionColumns(onViewDetails: (tx: Transaction) => void) 
     },
     {
       id: "date",
-      header: "Date",
+      header: "Transaction Date",
       cell: (tx: Transaction) => displayValue(tx.transaction_date, formatDate),
     },
     {
