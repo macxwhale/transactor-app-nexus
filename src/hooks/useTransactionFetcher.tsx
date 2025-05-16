@@ -45,7 +45,7 @@ export function useTransactionFetcher(applications: Application[]) {
       
       // First, get total count using a separate query
       const { count: totalCount, error: countError } = await buildFilteredQuery(filters, searchTerm)
-        .select('count', { count: 'exact', head: true });
+        .select('count', { head: true });
       
       if (countError) {
         throw countError;
