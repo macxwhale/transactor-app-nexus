@@ -14,6 +14,7 @@ interface TransactionTableProps {
   transactions: Transaction[];
   applications: Application[];
   isLoading: boolean;
+  isRefreshing?: boolean;
   onRefresh: () => void;
   onViewDetails: (tx: Transaction) => void;
   error?: string | null;
@@ -23,6 +24,7 @@ export function TransactionTable({
   transactions,
   applications,
   isLoading,
+  isRefreshing = false,
   onRefresh,
   onViewDetails,
   error,
@@ -34,7 +36,7 @@ export function TransactionTable({
       <TransactionTableHeader 
         onRefresh={onRefresh} 
         onExport={() => {}} 
-        isLoading={isLoading} 
+        isLoading={isRefreshing} 
       />
       
       <CardContent>

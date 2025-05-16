@@ -6,6 +6,7 @@ export function useTransactionState() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // No filtering logic, just return all transactions
   const filteredTransactions = transactions;
@@ -17,6 +18,8 @@ export function useTransactionState() {
     setIsLoading,
     selectedTx,
     setSelectedTx,
-    filteredTransactions
+    filteredTransactions,
+    isInitialized,
+    setIsInitialized
   };
 }

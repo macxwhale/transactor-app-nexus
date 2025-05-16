@@ -1,53 +1,62 @@
 
 import { useEffect } from "react";
-import { fetchTransactionsFromSupabase } from "@/services/transactionSupabaseService";
 import { useTransactionState } from "./useTransactionState";
 import { useApplicationsList } from "./useApplicationsList";
-import { Application, Transaction } from "@/lib/api";
+import { useTransactionFetcher } from "./useTransactionFetcher";
 
 export function useTransactions() {
   const {
-    transactions,
     setTransactions,
     isLoading,
     setIsLoading,
     selectedTx,
     setSelectedTx,
-    filteredTransactions
+    filteredTransactions,
+    isInitialized,
+    setIsInitialized
   } = useTransactionState();
 
   const { applications } = useApplicationsList();
-
-  const fetchTxs = async () => {
-    setIsLoading(true);
-    const txs = await fetchTransactionsFromSupabase();
-    
-    // Populate application names
-    const txsWithAppNames = txs.map((tx) => {
-      const app = applications.find((app) => app.id === tx.application_id);
-      return {
-        ...tx,
-        application_name: app ? app.name : `App ID: ${tx.application_id}`
-      };
-    });
-    
-    setTransactions(txsWithAppNames);
-    setIsLoading(false);
-  };
-
-  // Fetch transactions on component mount and whenever applications list changes
+  
+  const { 
+    transactions: fetchedTransactions, 
+    isLoading: isFetching,
+    isRefreshing,
+    error,
+    fetchTransactions
+  } = useTransactionFetcher(applications);
+  
+  // Effect to update transactions when fetched
   useEffect(() => {
-    if (applications.length > 0) { // Only fetch if applications are loaded
-      fetchTxs();
+    setTransactions(fetchedTransactions);
+  }, [fetchedTransactions, setTransactions]);
+  
+  // Effect to control loading state
+  useEffect(() => {
+    setIsLoading(isFetching);
+  }, [isFetching, setIsLoading]);
+  
+  // Fetch data when applications load, but only on first load
+  useEffect(() => {
+    if (applications.length > 0 && !isInitialized) {
+      fetchTransactions(false);
+      setIsInitialized(true);
     }
-  }, [applications.length]);
+  }, [applications.length, isInitialized]);
+
+  const refreshData = () => {
+    // When manually refreshing, we want to see the refresh state
+    fetchTransactions(true);
+  };
 
   return {
     transactions: filteredTransactions,
     applications,
     isLoading,
+    isRefreshing,
+    error,
     selectedTx,
     setSelectedTx,
-    fetchData: fetchTxs
+    fetchData: refreshData
   };
 }

@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   Table, 
   TableBody, 
@@ -26,27 +25,38 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const [localLoading, setLocalLoading] = useState(isLoading);
   
+  // Keep track of the previous data to prevent unnecessary renders
+  const [prevData, setPrevData] = useState<T[]>([]);
+  
+  // Memoize columns to prevent unnecessary re-renders
+  const memoizedColumns = useMemo(() => columns, [columns]);
+  
   // Use local loading state to prevent flicker
   useEffect(() => {
     if (isLoading) {
       setLocalLoading(true);
     } else {
+      // Only update data when not loading and data has changed
+      if (data !== prevData) {
+        setPrevData(data);
+      }
+      
       // Add a small delay before showing loaded content
       // to reduce perceived flickering
       const timeout = setTimeout(() => {
         setLocalLoading(false);
-      }, 100);
+      }, 300);
       
       return () => clearTimeout(timeout);
     }
-  }, [isLoading]);
+  }, [isLoading, data]);
 
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            {columns.map((column) => (
+            {memoizedColumns.map((column) => (
               <TableHead key={column.id}>{column.header}</TableHead>
             ))}
           </TableRow>
@@ -54,23 +64,23 @@ export function DataTable<T>({
         <TableBody>
           {localLoading ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-48 text-center">
+              <TableCell colSpan={memoizedColumns.length} className="h-48 text-center">
                 <div className="flex flex-col items-center justify-center space-y-2">
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
                   <div>Loading data...</div>
                 </div>
               </TableCell>
             </TableRow>
-          ) : data.length === 0 ? (
+          ) : prevData.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-48 text-center">
+              <TableCell colSpan={memoizedColumns.length} className="h-48 text-center">
                 No results found
               </TableCell>
             </TableRow>
           ) : (
-            data.map((item, i) => (
+            prevData.map((item, i) => (
               <TableRow key={i}>
-                {columns.map((column) => (
+                {memoizedColumns.map((column) => (
                   <TableCell key={column.id}>{column.cell(item)}</TableCell>
                 ))}
               </TableRow>

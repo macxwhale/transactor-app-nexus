@@ -9,13 +9,20 @@ export function useTransactionFetcher(applications: Application[]) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const { buildFilteredQuery } = useTransactionQueries();
   
-  const fetchTransactions = async () => {
+  const fetchTransactions = async (showRefreshState = true) => {
     console.log("Fetching all transactions without filters");
     
-    setIsLoading(true);
+    // Only show loading state if explicitly requested or during initial load
+    if (showRefreshState) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+    
     setError(null);
     
     try {
@@ -32,7 +39,6 @@ export function useTransactionFetcher(applications: Application[]) {
       if (!txData || txData.length === 0) {
         console.log("No transactions found");
         setTransactions([]);
-        setIsLoading(false);
         return;
       }
       
@@ -75,12 +81,14 @@ export function useTransactionFetcher(applications: Application[]) {
       setTransactions([]);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   return {
     transactions,
     isLoading,
+    isRefreshing,
     error,
     fetchTransactions
   };

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { TransactionDetailsDialog } from "@/components/transactions/TransactionDetailsDialog";
@@ -9,21 +9,12 @@ const Transactions = () => {
     transactions,
     applications,
     isLoading,
+    isRefreshing,
+    error,
     selectedTx,
     setSelectedTx,
     fetchData
   } = useTransactions();
-
-  // Force initial fetch when component mounts
-  useEffect(() => {
-    console.log("Transactions page mounted, fetching data...");
-    // Small delay to ensure all hooks are initialized
-    const timer = setTimeout(() => {
-      fetchData();
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [fetchData]);
 
   return (
     <div className="space-y-6">
@@ -35,7 +26,8 @@ const Transactions = () => {
         transactions={transactions}
         applications={applications}
         isLoading={isLoading}
-        error={null}
+        isRefreshing={isRefreshing}
+        error={error}
         onRefresh={() => {
           fetchData();
         }}
