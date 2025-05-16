@@ -8,18 +8,33 @@ export interface TransactionFilters {
   endDate: string;
 }
 
+export interface FilterState {
+  searchTerm: string;
+  filters: TransactionFilters;
+}
+
 export function useTransactionFilters() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState<TransactionFilters>({
-    status: "",
-    applicationId: "",
-    startDate: "",
-    endDate: "",
+  const [filterState, setFilterState] = useState<FilterState>({
+    searchTerm: "",
+    filters: {
+      status: "",
+      applicationId: "",
+      startDate: "",
+      endDate: "",
+    }
   });
 
+  const setSearchTerm = (term: string) => {
+    setFilterState(prev => ({ ...prev, searchTerm: term }));
+  };
+
+  const setFilters = (newFilters: TransactionFilters) => {
+    setFilterState(prev => ({ ...prev, filters: newFilters }));
+  };
+
   return {
-    searchTerm,
-    filters,
+    searchTerm: filterState.searchTerm,
+    filters: filterState.filters,
     setSearchTerm,
     setFilters,
   };
