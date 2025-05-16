@@ -44,16 +44,15 @@ export function useTransactionFetcher(applications: Application[]) {
       updateRefs(filters, searchTerm, currentPage);
       
       // First, get total count using a separate query
-      // Use proper count method for Supabase
       const countQuery = buildFilteredQuery(filters, searchTerm);
-      const { data: countData, error: countError } = await countQuery.count();
+      const { count, error: countError } = await countQuery.count();
       
       if (countError) {
         throw countError;
       }
       
-      // Get the count value from the countData response
-      const totalItems = countData || 0;
+      // Use the count value directly from the response
+      const totalItems = count || 0;
       
       console.log(`Total matching records before pagination: ${totalItems}`);
       
