@@ -11,6 +11,7 @@ const Transactions = () => {
     isLoading,
     currentPage,
     totalPages,
+    totalItems,
     selectedTx,
     filters,
     error,
@@ -23,6 +24,7 @@ const Transactions = () => {
 
   // Force initial fetch when component mounts
   useEffect(() => {
+    console.log("Transactions page mounted, fetching data...");
     fetchData();
   }, []);
 
@@ -38,6 +40,7 @@ const Transactions = () => {
         isLoading={isLoading}
         currentPage={currentPage}
         totalPages={totalPages}
+        totalItems={totalItems}
         filters={filters}
         error={error}
         onPageChange={setCurrentPage}
@@ -57,6 +60,6 @@ const Transactions = () => {
       />
     </div>
   );
-};
+}
 
 export default Transactions;

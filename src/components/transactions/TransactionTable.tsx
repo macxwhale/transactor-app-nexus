@@ -22,6 +22,7 @@ interface TransactionTableProps {
   isLoading: boolean;
   currentPage: number;
   totalPages: number;
+  totalItems?: number; // Added totalItems prop
   filters: {
     status: string;
     applicationId: string;
@@ -42,6 +43,7 @@ export function TransactionTable({
   isLoading,
   currentPage,
   totalPages,
+  totalItems,
   filters,
   onPageChange,
   onSearch,
@@ -149,6 +151,9 @@ export function TransactionTable({
           <CardTitle>Transaction History</CardTitle>
           <CardDescription>
             View and filter all your M-Pesa transactions
+            {totalItems !== undefined && (
+              <span className="ml-1">({totalItems} total records)</span>
+            )}
           </CardDescription>
         </div>
         <div className="flex gap-3">
@@ -195,6 +200,7 @@ export function TransactionTable({
           pagination={{
             currentPage,
             totalPages,
+            totalItems,
             onPageChange,
           }}
           isLoading={isLoading}

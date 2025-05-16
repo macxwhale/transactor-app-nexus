@@ -28,6 +28,7 @@ interface DataTableProps<T> {
   pagination?: {
     currentPage: number;
     totalPages: number;
+    totalItems?: number; // New prop to display total items count
     onPageChange: (page: number) => void;
   };
   isLoading?: boolean;
@@ -123,7 +124,16 @@ export function DataTable<T>({
       {pagination && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Page {pagination.currentPage} of {pagination.totalPages || 1}
+            {pagination.totalItems ? (
+              <>
+                Page {pagination.currentPage} of {pagination.totalPages || 1} 
+                <span className="ml-1">
+                  ({pagination.totalItems} total records)
+                </span>
+              </>
+            ) : (
+              <>Page {pagination.currentPage} of {pagination.totalPages || 1}</>
+            )}
           </div>
           <div className="flex items-center space-x-2">
             <Button
