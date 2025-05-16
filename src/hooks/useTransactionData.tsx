@@ -55,6 +55,53 @@ export function useTransactionData() {
     );
   };
   
+  // Helper function to build a query with all the necessary filters
+  const buildFilteredQuery = () => {
+    // Build query for transactions
+    let query = supabase
+      .from('transactions')
+      .select('*');
+    
+    // Apply filters with case-insensitive status matching
+    if (filters.status && filters.status !== 'all') {
+      // Handle all possible status variations with case-insensitivity
+      if (VALID_STATUSES.includes(filters.status.toLowerCase())) {
+        query = query.ilike('status', `%${filters.status}%`);
+        console.log(`Adding status filter: %${filters.status}%`);
+      }
+    }
+    
+    if (filters.applicationId && filters.applicationId !== 'all') {
+      query = query.eq('app_id', filters.applicationId);
+      console.log(`Adding app_id filter: ${filters.applicationId}`);
+    }
+    
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate);
+      // Set to beginning of day
+      startDate.setHours(0, 0, 0, 0);
+      const startTimestamp = startDate.getTime();
+      query = query.gte('transaction_date', startTimestamp);
+      console.log(`Adding startDate filter: ${startTimestamp}`);
+    }
+    
+    if (filters.endDate) {
+      const endDate = new Date(filters.endDate);
+      // Set to end of day
+      endDate.setHours(23, 59, 59, 999);
+      const endTimestamp = endDate.getTime();
+      query = query.lte('transaction_date', endTimestamp);
+      console.log(`Adding endDate filter: ${endTimestamp}`);
+    }
+    
+    if (searchTerm) {
+      query = query.or(`mpesa_receipt_number.ilike.%${searchTerm}%,phone_number.ilike.%${searchTerm}%`);
+      console.log(`Adding search filter: ${searchTerm}`);
+    }
+    
+    return query;
+  };
+  
   const fetchData = async () => {
     // Don't reload if nothing changed
     if (!filtersChanged() && transactions.length > 0) {
@@ -78,61 +125,39 @@ export function useTransactionData() {
       prevSearchRef.current = searchTerm;
       prevPageRef.current = currentPage;
       
-      // Build query for transactions
-      let query = supabase
-        .from('transactions')
-        .select('*', { count: 'exact' });
+      // First, get total count using a separate query
+      const countQuery = buildFilteredQuery();
+      const { count: totalCount, error: countError } = await countQuery.count();
       
-      // Apply filters with case-insensitive status matching
-      if (filters.status && filters.status !== 'all') {
-        // Handle all possible status variations with case-insensitivity
-        if (VALID_STATUSES.includes(filters.status.toLowerCase())) {
-          query = query.ilike('status', `%${filters.status}%`);
-          console.log(`Adding status filter: %${filters.status}%`);
-        }
+      if (countError) {
+        throw countError;
       }
       
-      if (filters.applicationId && filters.applicationId !== 'all') {
-        query = query.eq('app_id', filters.applicationId);
-        console.log(`Adding app_id filter: ${filters.applicationId}`);
+      console.log(`Total matching records before pagination: ${totalCount}`);
+      
+      // Set total pages and items based on the count
+      const totalItems = totalCount || 0;
+      const totalPages = Math.ceil(totalItems / PER_PAGE);
+      console.log(`Setting pagination: ${totalItems} total items, ${totalPages} total pages`);
+      
+      setTotalItems(totalItems);
+      setTotalPages(totalPages);
+      
+      if (totalItems === 0) {
+        // No need to fetch data if there are no matches
+        setTransactions([]);
+        setIsLoading(false);
+        return;
       }
       
-      if (filters.startDate) {
-        const startDate = new Date(filters.startDate);
-        // Set to beginning of day
-        startDate.setHours(0, 0, 0, 0);
-        const startTimestamp = startDate.getTime();
-        query = query.gte('transaction_date', startTimestamp);
-        console.log(`Adding startDate filter: ${startTimestamp}`);
-      }
-      
-      if (filters.endDate) {
-        const endDate = new Date(filters.endDate);
-        // Set to end of day
-        endDate.setHours(23, 59, 59, 999);
-        const endTimestamp = endDate.getTime();
-        query = query.lte('transaction_date', endTimestamp);
-        console.log(`Adding endDate filter: ${endTimestamp}`);
-      }
-      
-      if (searchTerm) {
-        query = query.or(`mpesa_receipt_number.ilike.%${searchTerm}%,phone_number.ilike.%${searchTerm}%`);
-        console.log(`Adding search filter: ${searchTerm}`);
-      }
-      
-      // Pagination
+      // Then get the actual paginated data
       const perPage = PER_PAGE;
       const from = (currentPage - 1) * perPage;
       const to = from + perPage - 1;
       console.log(`Pagination: from ${from} to ${to} (page ${currentPage}, ${perPage} per page)`);
       
-      // First get a count of all records without pagination to see the total
-      const countQuery = query.clone();
-      const { count: totalCount } = await countQuery.count().single();
-      console.log(`Total matching records before pagination: ${totalCount}`);
-      
-      // Then get the actual paginated data
-      const { data: txData, error: txError, count } = await query
+      const dataQuery = buildFilteredQuery();
+      const { data: txData, error: txError } = await dataQuery
         .range(from, to)
         .order('created_at', { ascending: false });
       
@@ -140,7 +165,7 @@ export function useTransactionData() {
         throw txError;
       }
 
-      console.log(`Fetched transactions: ${txData?.length || 0} out of ${count} total`);
+      console.log(`Fetched transactions: ${txData?.length || 0} out of ${totalItems} total`);
       
       // Convert Supabase transactions data to our Transaction type
       const formattedTransactions: Transaction[] = txData?.map(tx => {
@@ -172,14 +197,6 @@ export function useTransactionData() {
       }) || [];
       
       setTransactions(formattedTransactions);
-      
-      // Set total pages based on count
-      const totalItems = totalCount || count || 0;
-      const totalPages = Math.ceil(totalItems / perPage);
-      console.log(`Setting pagination: ${totalItems} total items, ${totalPages} total pages`);
-      
-      setTotalItems(totalItems);
-      setTotalPages(totalPages);
       
     } catch (error) {
       console.error("Failed to fetch transaction data:", error);
