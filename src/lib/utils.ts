@@ -16,15 +16,43 @@ export function formatCurrency(amount: number): string {
 }
 
 // Format date
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(date);
+export function formatDate(dateInput: string | number | null | undefined): string {
+  // Return N/A for null, undefined or empty values
+  if (dateInput === null || dateInput === undefined || dateInput === '') {
+    return "N/A";
+  }
+  
+  try {
+    let date: Date;
+    
+    // If the input is a number (timestamp), convert appropriately
+    if (typeof dateInput === 'number') {
+      // Check if it's in seconds (Unix timestamp) and convert to milliseconds if needed
+      if (dateInput < 10000000000) {
+        date = new Date(dateInput * 1000); // Convert seconds to milliseconds
+      } else {
+        date = new Date(dateInput); // Already in milliseconds
+      }
+    } else {
+      date = new Date(dateInput);
+    }
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return "N/A";
+    }
+    
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(date);
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return "N/A";
+  }
 }
 
 // Format phone number (Kenyan format)
