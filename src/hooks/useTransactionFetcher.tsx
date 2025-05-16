@@ -4,8 +4,7 @@ import { Transaction, Application } from "@/lib/api";
 import { toast } from "sonner";
 import { normalizeStatus } from "@/utils/transactionUtils";
 import { useTransactionQueries } from "./useTransactionQueries";
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { PostgrestResponse } from "@supabase/supabase-js";
 
 export function useTransactionFetcher(applications: Application[]) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -45,19 +44,16 @@ export function useTransactionFetcher(applications: Application[]) {
       // Update refs to current values
       updateRefs(filters, searchTerm, currentPage);
       
-      // First, get total count using a separate query
+      // First, get total count using the * selection and then counting the results
       const countQuery = buildFilteredQuery(filters, searchTerm);
-      
-      // Fix the typing issue with the count query
-      const countResult = await countQuery.count();
-      const { data: countData, error: countError } = countResult as PostgrestSingleResponse<{ count: number }[]>;
+      const { data: countData, error: countError } = await countQuery.select('count', { count: 'exact', head: true }) as PostgrestResponse<any>;
       
       if (countError) {
         throw countError;
       }
       
-      // Access the count from countData with proper type handling
-      const totalCount = countData?.[0]?.count ?? 0;
+      // Access the count from the response metadata
+      const totalCount = countData?.count || 0;
       const totalItems = typeof totalCount === 'number' ? totalCount : parseInt(String(totalCount), 10) || 0;
       
       console.log(`Total matching records before pagination: ${totalItems}`);
