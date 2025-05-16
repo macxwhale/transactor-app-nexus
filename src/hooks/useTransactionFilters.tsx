@@ -1,6 +1,4 @@
 
-import { useState } from "react";
-
 export interface TransactionFilters {
   status: string;
   applicationId: string;
@@ -14,28 +12,16 @@ export interface FilterState {
 }
 
 export function useTransactionFilters() {
-  const [filterState, setFilterState] = useState<FilterState>({
+  // Return empty objects since we're not filtering anymore
+  return {
     searchTerm: "",
     filters: {
       status: "",
       applicationId: "",
       startDate: "",
       endDate: "",
-    }
-  });
-
-  const setSearchTerm = (term: string) => {
-    setFilterState(prev => ({ ...prev, searchTerm: term }));
-  };
-
-  const setFilters = (newFilters: TransactionFilters) => {
-    setFilterState(prev => ({ ...prev, filters: newFilters }));
-  };
-
-  return {
-    searchTerm: filterState.searchTerm,
-    filters: filterState.filters,
-    setSearchTerm,
-    setFilters,
+    },
+    setSearchTerm: () => {},
+    setFilters: () => {},
   };
 }

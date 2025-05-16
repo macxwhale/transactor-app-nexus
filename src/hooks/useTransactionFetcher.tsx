@@ -12,28 +12,16 @@ export function useTransactionFetcher(applications: Application[]) {
   
   const { buildFilteredQuery } = useTransactionQueries();
   
-  const fetchTransactions = async (
-    searchTerm: string,
-    filters: {
-      status: string;
-      applicationId: string;
-      startDate: string;
-      endDate: string;
-    }
-  ) => {
-    console.log("Fetching transactions with filters:", { 
-      search: searchTerm, 
-      filters
-    });
+  const fetchTransactions = async () => {
+    console.log("Fetching all transactions without filters");
     
     setIsLoading(true);
     setError(null);
     
     try {
-      // Build query for getting all transactions
-      const dataQuery = buildFilteredQuery(filters, searchTerm);
-      const { data: txData, error: txError } = await dataQuery
-        .order('created_at', { ascending: false });
+      // Build simple query for getting all transactions
+      const dataQuery = buildFilteredQuery();
+      const { data: txData, error: txError } = await dataQuery;
       
       if (txError) {
         throw txError;
