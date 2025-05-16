@@ -44,17 +44,19 @@ export function useTransactionFetcher(applications: Application[]) {
       updateRefs(filters, searchTerm, currentPage);
       
       // First, get total count using a separate query
-      const { count: totalCount, error: countError } = await buildFilteredQuery(filters, searchTerm)
-        .select('count', { head: true });
+      const countQuery = buildFilteredQuery(filters, searchTerm)
+        .select('count', { count: 'exact', head: true });
+      
+      const { count, error: countError } = await countQuery;
       
       if (countError) {
         throw countError;
       }
       
-      console.log(`Total matching records before pagination: ${totalCount}`);
+      console.log(`Total matching records before pagination: ${count}`);
       
       // Set total pages and items based on the count
-      const totalItems = totalCount || 0;
+      const totalItems = count || 0;
       const totalPages = Math.ceil(totalItems / PER_PAGE);
       console.log(`Setting pagination: ${totalItems} total items, ${totalPages} total pages`);
       
