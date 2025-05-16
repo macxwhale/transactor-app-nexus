@@ -44,9 +44,9 @@ export function useTransactionFetcher(applications: Application[]) {
       updateRefs(filters, searchTerm, currentPage);
       
       // First, get total count using a separate query
-      // Fixed: buildFilteredQuery expects filters and searchTerm as separate arguments
+      // The select method should take only one argument for count
       const countQuery = buildFilteredQuery(filters, searchTerm)
-        .select('count', { count: 'exact' });
+        .select('count');
       
       const { count, error: countError } = await countQuery;
       
@@ -76,7 +76,6 @@ export function useTransactionFetcher(applications: Application[]) {
       const to = from + PER_PAGE - 1;
       console.log(`Pagination: from ${from} to ${to} (page ${currentPage}, ${PER_PAGE} per page)`);
       
-      // Fixed: buildFilteredQuery expects filters and searchTerm as separate arguments 
       const dataQuery = buildFilteredQuery(filters, searchTerm);
       const { data: txData, error: txError } = await dataQuery
         .range(from, to)
