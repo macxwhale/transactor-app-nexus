@@ -14,14 +14,6 @@ interface TransactionTableProps {
   transactions: Transaction[];
   applications: Application[];
   isLoading: boolean;
-  filters: {
-    status: string;
-    applicationId: string;
-    startDate: string;
-    endDate: string;
-  };
-  onSearch: (term: string) => void;
-  onFilterChange: (filters: any) => void;
   onRefresh: () => void;
   onViewDetails: (tx: Transaction) => void;
   error?: string | null;
