@@ -4,6 +4,7 @@ import { Transaction, Application } from "@/lib/api";
 import { toast } from "sonner";
 import { normalizeStatus } from "@/utils/transactionUtils";
 import { useTransactionQueries } from "./useTransactionQueries";
+import { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export function useTransactionFetcher(applications: Application[]) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -45,15 +46,17 @@ export function useTransactionFetcher(applications: Application[]) {
       
       // First, get total count using a separate query
       const countQuery = buildFilteredQuery(filters, searchTerm);
-      const { data: countData, error: countError } = await countQuery.count();
+      
+      // Type the count response properly
+      const { data: countData, error: countError }: PostgrestSingleResponse<{ count: number }[]> = await countQuery.count();
       
       if (countError) {
         throw countError;
       }
       
-      // Access the count from countData (Supabase count returns an array with a single object containing count)
-      const count = countData?.[0]?.count ?? 0;
-      const totalItems = typeof count === 'number' ? count : parseInt(count as string, 10) || 0;
+      // Access the count from countData with proper type handling
+      const totalCount = countData?.[0]?.count ?? 0;
+      const totalItems = typeof totalCount === 'number' ? totalCount : parseInt(String(totalCount), 10) || 0;
       
       console.log(`Total matching records before pagination: ${totalItems}`);
       
