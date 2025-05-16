@@ -45,14 +45,14 @@ export function useTransactionFetcher(applications: Application[]) {
       
       // First, get total count using a separate query
       const countQuery = buildFilteredQuery(filters, searchTerm);
-      const { count, error: countError } = await countQuery.count();
+      const { data: countData, error: countError } = await countQuery.count();
       
       if (countError) {
         throw countError;
       }
       
-      // Use the count value directly from the response
-      const totalItems = count || 0;
+      // Access the count from countData (it's an array with a single object that has a count property)
+      const totalItems = countData?.[0]?.count || 0;
       
       console.log(`Total matching records before pagination: ${totalItems}`);
       
