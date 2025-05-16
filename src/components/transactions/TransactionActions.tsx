@@ -38,8 +38,7 @@ export function TransactionActions({
 
   return (
     <div className="flex justify-end space-x-2">
-      {transaction.checkout_request_id && 
-       (transaction.status === 'pending' || transaction.status === 'processing') && (
+      {transaction.checkout_request_id && transaction.status === 'processing' && (
         <Button
           variant="outline"
           size="sm"
