@@ -4,3 +4,6 @@ project_id = "yviivxtgzmethbbtzwbv"
 [functions]
 [functions.update-app]
 verify_jwt = false
+
+[functions.delete-app]
+verify_jwt = false
