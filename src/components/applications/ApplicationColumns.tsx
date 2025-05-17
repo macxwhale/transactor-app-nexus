@@ -3,12 +3,14 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Application } from "@/lib/api";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Trash2 } from "lucide-react";
 
 interface ApplicationColumnProps {
   onEditApplication: (app: Application) => void;
+  onDeleteApplication: (app: Application) => void;
 }
 
-export const getApplicationColumns = ({ onEditApplication }: ApplicationColumnProps) => [
+export const getApplicationColumns = ({ onEditApplication, onDeleteApplication }: ApplicationColumnProps) => [
   {
     id: "name",
     header: "Name",
@@ -37,13 +39,24 @@ export const getApplicationColumns = ({ onEditApplication }: ApplicationColumnPr
     id: "actions",
     header: "Actions",
     cell: (app: Application) => (
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
         <Button
           variant="outline"
           size="sm"
           onClick={() => onEditApplication(app)}
         >
           Edit
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-red-500 hover:bg-red-50 hover:text-red-600"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteApplication(app);
+          }}
+        >
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
     ),

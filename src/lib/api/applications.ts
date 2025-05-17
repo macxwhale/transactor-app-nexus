@@ -22,6 +22,11 @@ export async function updateApplication(id: string, data: Partial<Application>):
   return response.data;
 }
 
+export async function deleteApplication(id: string): Promise<void> {
+  const response = await apiClient.delete<ApiResponse<void>>(`applications/${id}`);
+  return response.data;
+}
+
 export async function toggleApplicationStatus(id: string, isActive: boolean): Promise<Application> {
   const response = await apiClient.put<ApiResponse<Application>>(`applications/${id}/toggle-status`, { is_active: isActive });
   return response.data;

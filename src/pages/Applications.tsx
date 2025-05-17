@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,11 +16,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Plus, RefreshCcw } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { getApplicationColumns } from "@/components/applications/ApplicationColumns";
 import ApplicationForm from "@/components/applications/ApplicationForm";
 import { useApplications } from "@/hooks/useApplications";
+import { Application } from "@/lib/api";
+import { toast } from "sonner";
 
 const Applications = () => {
   const {
@@ -35,9 +47,46 @@ const Applications = () => {
     handleUpdateApplication,
     isSubmitting
   } = useApplications();
+  
+  // New state for delete confirmation dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [applicationToDelete, setApplicationToDelete] = useState<Application | null>(null);
+
+  const handleDeleteConfirm = async () => {
+    try {
+      if (!applicationToDelete) return;
+      
+      const { success } = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/delete-app', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: applicationToDelete.id })
+      }).then(res => res.json());
+      
+      if (success) {
+        toast.success(`${applicationToDelete.name} successfully deleted`);
+        fetchApps(); // Refresh the list
+      } else {
+        toast.error("Failed to delete application");
+      }
+    } catch (error) {
+      console.error("Error deleting application:", error);
+      toast.error("An error occurred while deleting the application");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setApplicationToDelete(null);
+    }
+  };
+
+  const handleDeleteApplication = (app: Application) => {
+    setApplicationToDelete(app);
+    setIsDeleteDialogOpen(true);
+  };
 
   const columns = getApplicationColumns({
     onEditApplication: setEditingApp,
+    onDeleteApplication: handleDeleteApplication,
   });
 
   return (
@@ -125,6 +174,24 @@ const Applications = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Application</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {applicationToDelete?.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setApplicationToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
