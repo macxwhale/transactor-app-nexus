@@ -35,8 +35,10 @@ import { Application } from "@/lib/api";
 import { toast } from "sonner";
 import StatusDialog from "@/components/applications/StatusDialog";
 import { useApplicationToggle } from "@/hooks/useApplicationToggle";
+import { usePagination } from "@/hooks/usePagination";
 
 const Applications = () => {
+  // Use existing hooks
   const {
     applications,
     isLoading,
@@ -50,7 +52,6 @@ const Applications = () => {
     isSubmitting
   } = useApplications();
   
-  // Add application toggle hook
   const {
     isStatusDialogOpen,
     setIsStatusDialogOpen,
@@ -59,6 +60,20 @@ const Applications = () => {
     handleToggleStatus,
     openStatusDialog
   } = useApplicationToggle(fetchApps);
+  
+  // Add pagination hook
+  const {
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    setTotalPages,
+  } = usePagination();
+
+  // Calculate total pages when applications change
+  React.useEffect(() => {
+    const ITEMS_PER_PAGE = 10;
+    setTotalPages(Math.max(1, Math.ceil(applications.length / ITEMS_PER_PAGE)));
+  }, [applications, setTotalPages]);
   
   // Delete confirmation dialog state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -161,6 +176,12 @@ const Applications = () => {
             data={applications}
             columns={columns}
             isLoading={isLoading}
+            pagination={{
+              currentPage,
+              totalPages,
+              onPageChange: setCurrentPage
+            }}
+            itemsPerPage={10}
           />
         </CardContent>
       </Card>

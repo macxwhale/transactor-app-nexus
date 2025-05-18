@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { 
   Table, 
@@ -7,6 +8,14 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/pagination";
 
 interface DataTableProps<T> {
   data: T[];
@@ -16,16 +25,22 @@ interface DataTableProps<T> {
     cell: (item: T) => React.ReactNode;
   }[];
   isLoading?: boolean;
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+  };
+  itemsPerPage?: number;
 }
 
 export function DataTable<T>({
   data,
   columns,
   isLoading = false,
+  pagination,
+  itemsPerPage = 10
 }: DataTableProps<T>) {
   const [localLoading, setLocalLoading] = useState(isLoading);
-  
-  // Keep track of the previous data to prevent unnecessary renders
   const [prevData, setPrevData] = useState<T[]>([]);
   
   // Memoize columns to prevent unnecessary re-renders
@@ -42,7 +57,6 @@ export function DataTable<T>({
       }
       
       // Add a small delay before showing loaded content
-      // to reduce perceived flickering
       const timeout = setTimeout(() => {
         setLocalLoading(false);
       }, 300);
@@ -50,6 +64,14 @@ export function DataTable<T>({
       return () => clearTimeout(timeout);
     }
   }, [isLoading, data]);
+
+  // Display only current page data if pagination is enabled
+  const displayData = pagination 
+    ? prevData.slice(
+        (pagination.currentPage - 1) * itemsPerPage, 
+        pagination.currentPage * itemsPerPage
+      )
+    : prevData;
 
   return (
     <div className="rounded-md border">
@@ -71,14 +93,14 @@ export function DataTable<T>({
                 </div>
               </TableCell>
             </TableRow>
-          ) : prevData.length === 0 ? (
+          ) : displayData.length === 0 ? (
             <TableRow>
               <TableCell colSpan={memoizedColumns.length} className="h-48 text-center">
                 No results found
               </TableCell>
             </TableRow>
           ) : (
-            prevData.map((item, i) => (
+            displayData.map((item, i) => (
               <TableRow key={i}>
                 {memoizedColumns.map((column) => (
                   <TableCell key={column.id}>{column.cell(item)}</TableCell>
@@ -88,6 +110,39 @@ export function DataTable<T>({
           )}
         </TableBody>
       </Table>
+      
+      {pagination && pagination.totalPages > 1 && (
+        <div className="py-4 border-t">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => pagination.onPageChange(Math.max(1, pagination.currentPage - 1))}
+                  className={pagination.currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    isActive={page === pagination.currentPage}
+                    onClick={() => pagination.onPageChange(page)}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => pagination.onPageChange(Math.min(pagination.totalPages, pagination.currentPage + 1))}
+                  className={pagination.currentPage >= pagination.totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }

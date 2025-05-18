@@ -10,7 +10,11 @@ export function useApplicationState() {
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  
+  // For pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  
   // No longer filter applications
   const filteredApplications = applications;
 
@@ -29,6 +33,10 @@ export function useApplicationState() {
     setNewStatus,
     isDialogOpen,
     setIsDialogOpen,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    setTotalPages,
     filteredApplications
   };
 }
