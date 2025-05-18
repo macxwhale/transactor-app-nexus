@@ -18,6 +18,7 @@ interface CreateApplicationDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: ApplicationFormValues) => Promise<boolean>;
   isSubmitting: boolean;
+  hideDefaultTrigger?: boolean;
 }
 
 const CreateApplicationDialog = ({
@@ -25,15 +26,18 @@ const CreateApplicationDialog = ({
   onOpenChange,
   onSubmit,
   isSubmitting,
+  hideDefaultTrigger = false,
 }: CreateApplicationDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="gap-1">
-          <Plus className="h-4 w-4" />
-          New Application
-        </Button>
-      </DialogTrigger>
+      {!hideDefaultTrigger && (
+        <DialogTrigger asChild>
+          <Button size="sm" className="gap-1">
+            <Plus className="h-4 w-4" />
+            New Application
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Register New Application</DialogTitle>

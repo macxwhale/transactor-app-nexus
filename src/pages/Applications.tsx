@@ -64,6 +64,7 @@ const Applications = () => {
         onOpenChange={setIsDialogOpen}
         onSubmit={handleCreateApplication}
         isSubmitting={isSubmitting}
+        hideDefaultTrigger={true}
       />
 
       <EditApplicationDialog 
