@@ -33,6 +33,8 @@ import ApplicationForm from "@/components/applications/ApplicationForm";
 import { useApplications } from "@/hooks/useApplications";
 import { Application } from "@/lib/api";
 import { toast } from "sonner";
+import StatusDialog from "@/components/applications/StatusDialog";
+import { useApplicationToggle } from "@/hooks/useApplicationToggle";
 
 const Applications = () => {
   const {
@@ -48,7 +50,17 @@ const Applications = () => {
     isSubmitting
   } = useApplications();
   
-  // New state for delete confirmation dialog
+  // Add application toggle hook
+  const {
+    isStatusDialogOpen,
+    setIsStatusDialogOpen,
+    selectedAppId,
+    newStatus,
+    handleToggleStatus,
+    openStatusDialog
+  } = useApplicationToggle(fetchApps);
+  
+  // Delete confirmation dialog state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [applicationToDelete, setApplicationToDelete] = useState<Application | null>(null);
 
@@ -84,9 +96,14 @@ const Applications = () => {
     setIsDeleteDialogOpen(true);
   };
 
+  const handleToggleStatusClick = (app: Application) => {
+    openStatusDialog(app.id, !app.is_active);
+  };
+
   const columns = getApplicationColumns({
     onEditApplication: setEditingApp,
     onDeleteApplication: handleDeleteApplication,
+    onToggleStatus: handleToggleStatusClick,
   });
 
   return (
@@ -192,6 +209,14 @@ const Applications = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Status toggle dialog */}
+      <StatusDialog 
+        isOpen={isStatusDialogOpen} 
+        onOpenChange={setIsStatusDialogOpen}
+        onConfirm={handleToggleStatus}
+        newStatus={newStatus}
+      />
     </div>
   );
 };
