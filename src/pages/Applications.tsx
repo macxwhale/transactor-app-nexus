@@ -1,11 +1,8 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
 import { useApplications } from "@/hooks/useApplications";
-import { Application } from "@/lib/api";
-import { useApplicationToggle } from "@/hooks/useApplicationToggle";
-import { usePagination } from "@/hooks/usePagination";
 import ApplicationsTable from "@/components/applications/ApplicationsTable";
 import DeleteApplicationDialog from "@/components/applications/DeleteApplicationDialog";
 import EditApplicationDialog from "@/components/applications/EditApplicationDialog";
@@ -13,7 +10,6 @@ import CreateApplicationDialog from "@/components/applications/CreateApplication
 import StatusDialog from "@/components/applications/StatusDialog";
 
 const Applications = () => {
-  // Use existing hooks
   const {
     applications,
     isLoading,
@@ -24,38 +20,20 @@ const Applications = () => {
     fetchApps,
     handleCreateApplication,
     handleUpdateApplication,
-    isSubmitting
-  } = useApplications();
-  
-  const {
+    handleDeleteApplication,
+    isSubmitting,
     isStatusDialogOpen,
     setIsStatusDialogOpen,
     newStatus,
     handleToggleStatus,
-    openStatusDialog
-  } = useApplicationToggle(fetchApps);
-  
-  // Add pagination hook
-  const { currentPage, totalPages, setCurrentPage, setTotalPages } = usePagination();
-
-  // Calculate total pages when applications change
-  React.useEffect(() => {
-    const ITEMS_PER_PAGE = 10;
-    setTotalPages(Math.max(1, Math.ceil(applications.length / ITEMS_PER_PAGE)));
-  }, [applications, setTotalPages]);
-  
-  // Delete confirmation dialog state
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [applicationToDelete, setApplicationToDelete] = useState<Application | null>(null);
-
-  const handleToggleStatusClick = (app: Application) => {
-    openStatusDialog(app.id, !app.is_active);
-  };
-
-  const handleDeleteApplication = (app: Application) => {
-    setApplicationToDelete(app);
-    setIsDeleteDialogOpen(true);
-  };
+    openStatusDialog,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    applicationToDelete,
+    currentPage,
+    totalPages,
+    setCurrentPage
+  } = useApplications();
 
   return (
     <div className="space-y-6">
@@ -89,11 +67,10 @@ const Applications = () => {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
         onEditApplication={setEditingApp}
-        onDeleteApplication={handleDeleteApplication}
-        onToggleStatus={handleToggleStatusClick}
+        onDeleteApplication={(app) => openStatusDialog(app.id, !app.is_active)}
+        onToggleStatus={(app) => openStatusDialog(app.id, !app.is_active)}
       />
 
-      {/* Edit Dialog */}
       <EditApplicationDialog 
         editingApp={editingApp}
         isSubmitting={isSubmitting}
@@ -101,15 +78,13 @@ const Applications = () => {
         onSubmit={handleUpdateApplication}
       />
 
-      {/* Delete confirmation dialog */}
       <DeleteApplicationDialog 
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         application={applicationToDelete}
-        onDeleteComplete={fetchApps}
+        onDeleteComplete={handleDeleteApplication}
       />
 
-      {/* Status toggle dialog */}
       <StatusDialog 
         isOpen={isStatusDialogOpen} 
         onOpenChange={setIsStatusDialogOpen}
