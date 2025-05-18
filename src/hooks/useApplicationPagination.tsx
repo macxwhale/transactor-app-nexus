@@ -24,13 +24,16 @@ export function useApplicationPagination(applications: Application[], options: P
   }, [totalPages, currentPage]);
 
   // Calculate paginated applications
-  const paginatedApplications = useMemo(() => 
-    applications.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    ),
-    [applications, currentPage, itemsPerPage]
-  );
+  const paginatedApplications = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return applications.slice(startIndex, endIndex);
+  }, [applications, currentPage, itemsPerPage]);
+
+  // Log pagination info for debugging
+  useEffect(() => {
+    console.log(`Pagination: Page ${currentPage} of ${totalPages}, showing ${paginatedApplications.length} of ${applications.length} applications`);
+  }, [currentPage, totalPages, paginatedApplications.length, applications.length]);
 
   return {
     currentPage,

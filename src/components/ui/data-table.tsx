@@ -14,7 +14,8 @@ import {
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious
+  PaginationPrevious,
+  PaginationEllipsis
 } from "@/components/ui/pagination";
 
 interface DataTableProps<T> {
@@ -65,13 +66,41 @@ export function DataTable<T>({
     }
   }, [isLoading, data]);
 
-  // Display only current page data if pagination is enabled
-  const displayData = pagination 
-    ? prevData.slice(
-        (pagination.currentPage - 1) * itemsPerPage, 
-        pagination.currentPage * itemsPerPage
-      )
-    : prevData;
+  // Display data is handled by the parent component now
+
+  // Function to generate page numbers with ellipsis for better UX with many pages
+  const getPageNumbers = (currentPage: number, totalPages: number) => {
+    const pageNumbers = [];
+    
+    // Always show first page
+    pageNumbers.push(1);
+    
+    // Calculate range around current page
+    const rangeStart = Math.max(2, currentPage - 1);
+    const rangeEnd = Math.min(totalPages - 1, currentPage + 1);
+    
+    // Add ellipsis after first page if needed
+    if (rangeStart > 2) {
+      pageNumbers.push('ellipsis-start');
+    }
+    
+    // Add page numbers around current page
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      pageNumbers.push(i);
+    }
+    
+    // Add ellipsis before last page if needed
+    if (rangeEnd < totalPages - 1) {
+      pageNumbers.push('ellipsis-end');
+    }
+    
+    // Always show last page if there is more than one page
+    if (totalPages > 1) {
+      pageNumbers.push(totalPages);
+    }
+    
+    return pageNumbers;
+  };
 
   return (
     <div className="rounded-md border">
@@ -93,14 +122,14 @@ export function DataTable<T>({
                 </div>
               </TableCell>
             </TableRow>
-          ) : displayData.length === 0 ? (
+          ) : data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={memoizedColumns.length} className="h-48 text-center">
                 No results found
               </TableCell>
             </TableRow>
           ) : (
-            displayData.map((item, i) => (
+            data.map((item, i) => (
               <TableRow key={i}>
                 {memoizedColumns.map((column) => (
                   <TableCell key={column.id}>{column.cell(item)}</TableCell>
@@ -122,15 +151,21 @@ export function DataTable<T>({
                 />
               </PaginationItem>
               
-              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    isActive={page === pagination.currentPage}
-                    onClick={() => pagination.onPageChange(page)}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
+              {getPageNumbers(pagination.currentPage, pagination.totalPages).map((page, index) => (
+                page === 'ellipsis-start' || page === 'ellipsis-end' ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      isActive={page === pagination.currentPage}
+                      onClick={() => pagination.onPageChange(Number(page))}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
               ))}
               
               <PaginationItem>

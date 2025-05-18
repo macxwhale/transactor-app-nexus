@@ -59,6 +59,13 @@ const Applications = () => {
         onToggleStatus={(app) => openStatusDialog(app.id, !app.is_active)}
       />
 
+      <CreateApplicationDialog 
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSubmit={handleCreateApplication}
+        isSubmitting={isSubmitting}
+      />
+
       <EditApplicationDialog 
         editingApp={editingApp}
         isSubmitting={isSubmitting}
@@ -78,13 +85,6 @@ const Applications = () => {
         onOpenChange={setIsStatusDialogOpen}
         onConfirm={handleToggleStatus}
         newStatus={newStatus}
-      />
-
-      <CreateApplicationDialog 
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onSubmit={handleCreateApplication}
-        isSubmitting={isSubmitting}
       />
     </div>
   );

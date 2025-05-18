@@ -50,7 +50,6 @@ const ApplicationsTable = ({
             totalPages,
             onPageChange
           }}
-          itemsPerPage={10}
         />
       </CardContent>
     </Card>
