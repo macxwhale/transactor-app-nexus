@@ -1,28 +1,35 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Application } from "@/lib/api";
 
-const ITEMS_PER_PAGE = 10;
+interface PaginationOptions {
+  itemsPerPage?: number;
+}
 
-export function useApplicationPagination(applications: Application[]) {
+export function useApplicationPagination(applications: Application[], options: PaginationOptions = {}) {
+  const { itemsPerPage = 10 } = options;
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  
+  // Calculate total pages based on applications length
+  const totalPages = useMemo(() => 
+    Math.max(1, Math.ceil(applications.length / itemsPerPage)),
+    [applications.length, itemsPerPage]
+  );
 
-  // Calculate total pages when applications change
-  useEffect(() => {
-    setTotalPages(Math.max(1, Math.ceil(applications.length / ITEMS_PER_PAGE)));
-  }, [applications]);
-
-  // Reset to first page when application count changes significantly
+  // Ensure current page is valid when total pages changes
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     }
   }, [totalPages, currentPage]);
 
-  const paginatedApplications = applications.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+  // Calculate paginated applications
+  const paginatedApplications = useMemo(() => 
+    applications.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    ),
+    [applications, currentPage, itemsPerPage]
   );
 
   return {
@@ -30,5 +37,6 @@ export function useApplicationPagination(applications: Application[]) {
     totalPages,
     setCurrentPage,
     paginatedApplications,
+    totalItems: applications.length,
   };
 }

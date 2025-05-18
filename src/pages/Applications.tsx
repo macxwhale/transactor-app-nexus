@@ -8,6 +8,7 @@ import DeleteApplicationDialog from "@/components/applications/DeleteApplication
 import EditApplicationDialog from "@/components/applications/EditApplicationDialog";
 import CreateApplicationDialog from "@/components/applications/CreateApplicationDialog";
 import StatusDialog from "@/components/applications/StatusDialog";
+import ApplicationsHeader from "@/components/applications/ApplicationsHeader";
 
 const Applications = () => {
   const {
@@ -32,33 +33,21 @@ const Applications = () => {
     applicationToDelete,
     currentPage,
     totalPages,
-    setCurrentPage
+    setCurrentPage,
+    allApplicationsCount
   } = useApplications();
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1"
-            onClick={fetchApps}
-            disabled={isLoading}
-          >
-            <RefreshCcw className="h-4 w-4" />
-            Refresh
-          </Button>
-          
-          <CreateApplicationDialog 
-            isOpen={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
-            onSubmit={handleCreateApplication}
-            isSubmitting={isSubmitting}
-          />
-        </div>
-      </div>
+      <ApplicationsHeader 
+        fetchApps={fetchApps} 
+        isLoading={isLoading}
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+        handleCreateApplication={handleCreateApplication}
+        isSubmitting={isSubmitting}
+        totalApplications={allApplicationsCount}
+      />
 
       <ApplicationsTable 
         applications={applications}
@@ -67,7 +56,7 @@ const Applications = () => {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
         onEditApplication={setEditingApp}
-        onDeleteApplication={(app) => openStatusDialog(app.id, !app.is_active)}
+        onDeleteApplication={(app) => openDeleteDialog(app)}
         onToggleStatus={(app) => openStatusDialog(app.id, !app.is_active)}
       />
 
@@ -90,6 +79,13 @@ const Applications = () => {
         onOpenChange={setIsStatusDialogOpen}
         onConfirm={handleToggleStatus}
         newStatus={newStatus}
+      />
+
+      <CreateApplicationDialog 
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSubmit={handleCreateApplication}
+        isSubmitting={isSubmitting}
       />
     </div>
   );

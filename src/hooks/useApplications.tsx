@@ -9,6 +9,7 @@ import { useApplicationDelete } from "./useApplicationDelete";
 import { useApplicationPagination } from "./useApplicationPagination";
 
 export function useApplications() {
+  // Initialize the state hook
   const {
     applications,
     setApplications,
@@ -19,9 +20,12 @@ export function useApplications() {
   // Fetch applications function
   const fetchApps = async () => {
     setIsLoading(true);
-    const apps = await fetchApplicationsFromSupabase();
-    setApplications(apps);
-    setIsLoading(false);
+    try {
+      const apps = await fetchApplicationsFromSupabase();
+      setApplications(apps);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Initialize the specialized hooks
@@ -56,12 +60,13 @@ export function useApplications() {
     isDeleting
   } = useApplicationDelete(fetchApps);
 
-  // Use pagination hook
+  // Use pagination hook with all applications (not pre-paginated data)
   const { 
     currentPage, 
     totalPages, 
     setCurrentPage,
-    paginatedApplications 
+    paginatedApplications,
+    totalItems
   } = useApplicationPagination(applications);
   
   // Combine submission states
@@ -73,7 +78,9 @@ export function useApplications() {
   }, []);
 
   return {
-    applications: paginatedApplications,
+    // Return paginated applications for display
+    applications: paginatedApplications, 
+    allApplicationsCount: totalItems,
     isLoading,
     editingApp,
     isDialogOpen,
