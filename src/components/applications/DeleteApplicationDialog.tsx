@@ -17,7 +17,7 @@ interface DeleteApplicationDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   application: Application | null;
-  onDeleteComplete: () => Promise<void>;
+  onDeleteComplete: () => Promise<boolean>;
 }
 
 const DeleteApplicationDialog = ({
