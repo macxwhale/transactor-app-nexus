@@ -11,11 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import ApplicationForm from "@/components/applications/ApplicationForm";
+import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
 
 interface CreateApplicationDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: any) => Promise<boolean>;
+  onSubmit: (data: ApplicationFormValues) => Promise<boolean>;
   isSubmitting: boolean;
 }
 

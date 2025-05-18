@@ -1,7 +1,5 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
 import { useApplications } from "@/hooks/useApplications";
 import ApplicationsTable from "@/components/applications/ApplicationsTable";
 import DeleteApplicationDialog from "@/components/applications/DeleteApplicationDialog";
@@ -31,6 +29,7 @@ const Applications = () => {
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     applicationToDelete,
+    openDeleteDialog,
     currentPage,
     totalPages,
     setCurrentPage,
@@ -56,7 +55,7 @@ const Applications = () => {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
         onEditApplication={setEditingApp}
-        onDeleteApplication={(app) => openDeleteDialog(app)}
+        onDeleteApplication={openDeleteDialog}
         onToggleStatus={(app) => openStatusDialog(app.id, !app.is_active)}
       />
 

@@ -2,13 +2,14 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, Plus } from "lucide-react";
+import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
 
 interface ApplicationsHeaderProps {
   fetchApps: () => Promise<void>;
   isLoading: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
-  handleCreateApplication: (data: any) => Promise<void>;
+  handleCreateApplication: (data: ApplicationFormValues) => Promise<boolean>;
   isSubmitting: boolean;
   totalApplications: number;
 }

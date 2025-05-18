@@ -9,12 +9,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ApplicationForm from "@/components/applications/ApplicationForm";
+import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
 
 interface EditApplicationDialogProps {
   editingApp: Application | null;
   isSubmitting: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => Promise<boolean>;
+  onSubmit: (data: ApplicationFormValues) => Promise<boolean>;
 }
 
 const EditApplicationDialog = ({
