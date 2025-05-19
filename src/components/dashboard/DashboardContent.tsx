@@ -21,28 +21,34 @@ interface DashboardContentProps {
 
 export const DashboardContent = ({ stats }: DashboardContentProps) => {
   return (
-    <>
+    <div className="space-y-8">
       {/* Stats Overview */}
-      <DashboardStats stats={stats} />
+      <div className="animate-fade-in">
+        <DashboardStats stats={stats} />
+      </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         {/* Daily Transaction Chart */}
-        <DailyTransactionsChart dailyStats={stats.dailyStats} />
+        <div className="lg:col-span-2 h-[400px] glass-card rounded-xl p-2 hover-lift">
+          <DailyTransactionsChart dailyStats={stats.dailyStats} />
+        </div>
 
         {/* Status Distribution */}
-        <StatusDistributionChart stats={stats} />
+        <div className="lg:col-span-1 h-[400px] glass-card rounded-xl p-2 hover-lift">
+          <StatusDistributionChart stats={stats} />
+        </div>
       </div>
 
       {/* Top Applications */}
-      <div className="mt-6">
+      <div className="glass-card rounded-xl p-2 hover-lift">
         <TopApplications topApplications={stats.topApplications} />
       </div>
 
       {/* Recent Transactions */}
-      <div className="mt-6">
+      <div className="glass-card rounded-xl p-2 hover-lift">
         <RecentTransactions recentTransactions={stats.recentTransactions} />
       </div>
-    </>
+    </div>
   );
 };

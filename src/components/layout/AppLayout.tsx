@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import {
   BarChart3,
   CreditCard,
-  Home,
   LayoutDashboard,
   LogOut,
   Settings,
@@ -27,12 +26,14 @@ const SidebarItem = ({ icon: Icon, label, href, active }: SidebarItemProps) => {
       <Button
         variant="ghost"
         className={cn(
-          "w-full justify-start gap-2 font-normal",
-          active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "bg-transparent text-sidebar-foreground"
+          "w-full justify-start gap-3 font-medium transition-all duration-200",
+          active 
+            ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-md" 
+            : "bg-transparent text-sidebar-foreground hover:bg-sidebar-accent/50"
         )}
       >
-        <Icon size={20} />
-        {label}
+        <Icon size={18} className={active ? "animate-pulse" : ""} />
+        <span className={active ? "font-semibold" : ""}>{label}</span>
       </Button>
     </Link>
   );
@@ -65,19 +66,21 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   ];
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-sidebar flex-shrink-0 flex flex-col">
+      <div className="w-64 bg-sidebar flex-shrink-0 flex flex-col shadow-xl overflow-hidden border-r border-sidebar-border">
         <div className="p-6">
-          <Link to="/" className="flex items-center gap-2">
-            <CreditCard className="h-8 w-8 text-sidebar-foreground" />
+          <Link to="/" className="flex items-center gap-3 transition-transform hover:scale-105">
+            <div className="h-8 w-8 rounded-md bg-white flex items-center justify-center text-sidebar">
+              <CreditCard className="h-5 w-5 text-sidebar-background" />
+            </div>
             <span className="text-xl font-bold text-sidebar-foreground">
               M-Pesa Admin
             </span>
           </Link>
         </div>
-        <Separator className="bg-sidebar-border" />
-        <div className="flex-1 p-4 flex flex-col gap-1">
+        <Separator className="bg-sidebar-border/50" />
+        <div className="flex-1 p-4 flex flex-col gap-2">
           {navItems.map((item) => (
             <SidebarItem
               key={item.href}
@@ -88,21 +91,23 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             />
           ))}
         </div>
-        <div className="p-4">
+        <div className="p-4 bg-sidebar-accent/20">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-2 text-sidebar-foreground"
+            className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent/30"
           >
-            <LogOut size={20} />
-            Sign Out
+            <LogOut size={18} />
+            <span>Sign Out</span>
           </Button>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex-1 p-6 overflow-y-auto">
-          {children}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </div>
       </div>
 

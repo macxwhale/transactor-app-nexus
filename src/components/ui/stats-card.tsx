@@ -8,6 +8,10 @@ interface StatsCardProps {
   icon?: React.ReactNode;
   description?: string;
   className?: string;
+  trend?: {
+    value: number;
+    positive: boolean;
+  };
 }
 
 export function StatsCard({
@@ -16,17 +20,35 @@ export function StatsCard({
   icon,
   description,
   className,
+  trend,
 }: StatsCardProps) {
   return (
-    <Card className={cn(className)}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <Card className={cn("overflow-hidden hover-lift", className)}>
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/80 to-secondary/80" />
+      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-6">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon && <div className="h-4 w-4 text-muted-foreground">{icon}</div>}
+        {icon && <div className="h-5 w-5 text-primary">{icon}</div>}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-3xl font-bold">{value}</div>
         {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="text-xs text-muted-foreground mt-1 flex items-center">
+            {trend && (
+              <span className={cn(
+                "inline-flex items-center mr-1 text-xs font-medium",
+                trend.positive ? "text-success" : "text-destructive"
+              )}>
+                <span className={cn(
+                  "mr-0.5",
+                  trend.positive ? "text-success" : "text-destructive"
+                )}>
+                  {trend.positive ? '↑' : '↓'}
+                </span>
+                {Math.abs(trend.value)}%
+              </span>
+            )}
+            {description}
+          </p>
         )}
       </CardContent>
     </Card>

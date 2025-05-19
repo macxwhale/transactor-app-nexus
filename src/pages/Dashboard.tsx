@@ -2,7 +2,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DashboardLoadingState } from "@/components/dashboard/DashboardLoadingState";
@@ -13,18 +12,25 @@ const Dashboard = () => {
   const { stats, isLoading, fetchStats } = useDashboardStats();
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Overview of your M-Pesa transactions and statistics
+          </p>
+        </div>
         <Button
           variant="outline"
           size="sm"
-          className="gap-1"
+          className="gap-2 self-start hover:bg-primary/10"
           onClick={fetchStats}
           disabled={isLoading}
         >
-          <RefreshCcw className="h-4 w-4" />
-          Refresh
+          <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh Stats
         </Button>
       </div>
 
