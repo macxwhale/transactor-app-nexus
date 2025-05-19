@@ -13,7 +13,12 @@ const Transactions = () => {
     error,
     selectedTx,
     setSelectedTx,
-    fetchData
+    fetchData,
+    // Pagination properties
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    totalItems
   } = useTransactions();
 
   return (
@@ -32,6 +37,12 @@ const Transactions = () => {
           fetchData();
         }}
         onViewDetails={setSelectedTx}
+        pagination={{
+          currentPage,
+          totalPages,
+          onPageChange: setCurrentPage,
+          totalItems
+        }}
       />
 
       <TransactionDetailsDialog

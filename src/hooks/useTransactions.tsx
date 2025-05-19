@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useTransactionState } from "./useTransactionState";
 import { useApplicationsList } from "./useApplicationsList";
 import { useTransactionFetcher } from "./useTransactionFetcher";
+import { useTransactionPagination } from "./useTransactionPagination";
 
 export function useTransactions() {
   const {
@@ -42,7 +43,16 @@ export function useTransactions() {
       fetchTransactions(false);
       setIsInitialized(true);
     }
-  }, [applications.length, isInitialized]);
+  }, [applications.length, isInitialized, fetchTransactions, setIsInitialized]);
+
+  // Use pagination with filtered transactions
+  const {
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    paginatedTransactions,
+    totalItems
+  } = useTransactionPagination(filteredTransactions);
 
   const refreshData = () => {
     // When manually refreshing, we want to see the refresh state
@@ -50,13 +60,20 @@ export function useTransactions() {
   };
 
   return {
-    transactions: filteredTransactions,
+    // Return paginated transactions for display
+    transactions: paginatedTransactions,
+    allTransactions: filteredTransactions,
     applications,
     isLoading,
     isRefreshing,
     error,
     selectedTx,
     setSelectedTx,
-    fetchData: refreshData
+    fetchData: refreshData,
+    // Pagination
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    totalItems
   };
 }

@@ -18,6 +18,12 @@ interface TransactionTableProps {
   onRefresh: () => void;
   onViewDetails: (tx: Transaction) => void;
   error?: string | null;
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+    totalItems: number;
+  };
 }
 
 export function TransactionTable({
@@ -28,6 +34,7 @@ export function TransactionTable({
   onRefresh,
   onViewDetails,
   error,
+  pagination,
 }: TransactionTableProps) {
   const columns = getTransactionColumns(onViewDetails);
 
@@ -46,6 +53,7 @@ export function TransactionTable({
           data={transactions}
           columns={columns}
           isLoading={isLoading}
+          pagination={pagination}
         />
       </CardContent>
     </Card>
