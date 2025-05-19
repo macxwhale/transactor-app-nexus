@@ -24,6 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { supabase } from "@/integrations/supabase/client";
 
 const configSchema = z.object({
   apiDomain: z
@@ -38,38 +39,76 @@ type ConfigFormValues = z.infer<typeof configSchema>;
 
 const Configuration = () => {
   const [isLoading, setIsLoading] = useState(false);
-
-  // In a real application, load this from a settings API or local storage
-  const savedDomain = localStorage.getItem("apiDomain") || "";
+  const [apiDomain, setApiDomain] = useState("");
 
   const form = useForm<ConfigFormValues>({
     resolver: zodResolver(configSchema),
     defaultValues: {
-      apiDomain: savedDomain,
+      apiDomain: "",
     },
   });
-
+  
+  // Load the API domain from the database on component mount
   useEffect(() => {
-    // Set the API domain in the client when component mounts
-    if (savedDomain) {
-      apiClient.setBaseUrl(savedDomain);
+    async function loadApiConfig() {
+      try {
+        const { data, error } = await supabase
+          .from('api_configurations')
+          .select('value')
+          .eq('key', 'apiDomain')
+          .single();
+
+        if (error) {
+          console.error("Error loading API configuration:", error);
+          return;
+        }
+        
+        if (data) {
+          // Set the form value with the loaded API domain
+          const savedDomain = data.value;
+          form.setValue('apiDomain', savedDomain);
+          setApiDomain(savedDomain);
+          
+          // Set the API domain in the client
+          if (savedDomain) {
+            apiClient.setBaseUrl(savedDomain);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load API configuration:", error);
+      }
     }
-  }, [savedDomain]);
+    
+    loadApiConfig();
+  }, [form]);
 
   const onSubmit = async (data: ConfigFormValues) => {
     setIsLoading(true);
+    
     try {
-      // Save to localStorage for demo purposes
-      // In a real app, you would save this to a database
-      localStorage.setItem("apiDomain", data.apiDomain);
+      // Save to database instead of localStorage
+      const { error } = await supabase
+        .from('api_configurations')
+        .upsert(
+          { 
+            key: 'apiDomain', 
+            value: data.apiDomain, 
+            description: 'The base URL for all API requests'
+          },
+          { onConflict: 'key' }
+        );
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Update the local state
+      setApiDomain(data.apiDomain);
       
       // Update the API client's base URL
       apiClient.setBaseUrl(data.apiDomain);
       
       toast.success("API configuration updated successfully");
-      
-      // In a real application, you might want to validate the API domain
-      // by making a test request
     } catch (error) {
       console.error("Failed to update configuration:", error);
       toast.error("Failed to update configuration");
@@ -141,41 +180,25 @@ const Configuration = () => {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-medium">App Registration</h3>
+              <h3 className="text-lg font-medium">Login</h3>
               <p className="text-sm text-muted-foreground mb-2">
-                Register a new application
+                Authenticate with the API using an app ID
               </p>
               <div className="bg-muted p-3 rounded-md font-mono text-sm">
-                POST /register
+                POST /login
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Fallback: Supabase Edge Function at https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app
-              </p>
             </div>
             
             <div>
-              <h3 className="text-lg font-medium">Update Application</h3>
+              <h3 className="text-lg font-medium">Transaction Query</h3>
               <p className="text-sm text-muted-foreground mb-2">
-                Update an existing application
+                Query transaction status by checkout request ID
               </p>
               <div className="bg-muted p-3 rounded-md font-mono text-sm">
-                PUT /applications/:id
+                POST /express/query
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                Fallback: Edge Function (PUT method)
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium">Toggle Application Status</h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                Activate or deactivate an application
-              </p>
-              <div className="bg-muted p-3 rounded-md font-mono text-sm">
-                PUT /applications/:id/toggle-status
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Fallback: Edge Function (PUT method with is_active parameter)
+                Headers required: App-ID
               </p>
             </div>
             
