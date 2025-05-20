@@ -23,16 +23,16 @@ export function StatsCard({
   trend,
 }: StatsCardProps) {
   return (
-    <Card className={cn("overflow-hidden hover-lift", className)}>
+    <Card className={cn("overflow-hidden hover-lift card-shine", className)}>
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/80 to-secondary/80" />
-      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-6">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon && <div className="h-5 w-5 text-primary">{icon}</div>}
+      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        {icon && <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{icon}</div>}
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold">{value}</div>
+        <div className="text-2xl font-bold">{value}</div>
         {description && (
-          <p className="text-xs text-muted-foreground mt-1 flex items-center">
+          <p className="text-xs text-muted-foreground mt-2 flex items-center">
             {trend && (
               <span className={cn(
                 "inline-flex items-center mr-1 text-xs font-medium",

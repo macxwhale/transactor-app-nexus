@@ -5,6 +5,7 @@ import { DailyTransactionsChart } from "@/components/dashboard/DailyTransactions
 import { StatusDistributionChart } from "@/components/dashboard/StatusDistributionChart";
 import { TopApplications } from "@/components/dashboard/TopApplications";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
+import { Separator } from "@/components/ui/separator";
 
 interface DashboardContentProps {
   stats: {
@@ -28,26 +29,30 @@ export const DashboardContent = ({ stats }: DashboardContentProps) => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Daily Transaction Chart */}
-        <div className="lg:col-span-2 h-[400px] glass-card rounded-xl p-2 hover-lift">
+        <div className="lg:col-span-2 bg-card rounded-lg shadow-card overflow-hidden border border-border/40">
           <DailyTransactionsChart dailyStats={stats.dailyStats} />
         </div>
 
         {/* Status Distribution */}
-        <div className="lg:col-span-1 h-[400px] glass-card rounded-xl p-2 hover-lift">
+        <div className="bg-card rounded-lg shadow-card overflow-hidden border border-border/40">
           <StatusDistributionChart stats={stats} />
         </div>
       </div>
 
-      {/* Top Applications */}
-      <div className="glass-card rounded-xl p-2 hover-lift">
-        <TopApplications topApplications={stats.topApplications} />
-      </div>
+      <Separator />
 
-      {/* Recent Transactions */}
-      <div className="glass-card rounded-xl p-2 hover-lift">
-        <RecentTransactions recentTransactions={stats.recentTransactions} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Applications */}
+        <div className="bg-card rounded-lg shadow-card overflow-hidden border border-border/40">
+          <TopApplications topApplications={stats.topApplications} />
+        </div>
+
+        {/* Recent Transactions */}
+        <div className="bg-card rounded-lg shadow-card overflow-hidden border border-border/40">
+          <RecentTransactions recentTransactions={stats.recentTransactions} />
+        </div>
       </div>
     </div>
   );
