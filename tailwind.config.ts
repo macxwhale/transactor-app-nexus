@@ -81,6 +81,9 @@ export default {
 				'soft': '0px 2px 6px rgba(0, 0, 0, 0.08)',
 				'card': '0px 4px 12px rgba(0, 0, 0, 0.05)',
 				'elevated': '0px 8px 24px rgba(0, 0, 0, 0.12)',
+				'dark-soft': '0px 2px 6px rgba(0, 0, 0, 0.25)',
+				'dark-card': '0px 4px 12px rgba(0, 0, 0, 0.3)',
+				'dark-elevated': '0px 8px 24px rgba(0, 0, 0, 0.4)',
 			},
 			keyframes: {
 				'accordion-down': {
