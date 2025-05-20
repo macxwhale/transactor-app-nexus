@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { ChevronRight, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -27,7 +26,7 @@ export const SidebarItem = ({
       <Button
         variant="ghost"
         className={cn(
-          "w-full justify-start gap-3 font-medium",
+          "w-full justify-start gap-3 font-medium transition-all duration-200",
           active 
             ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-md dark:bg-sidebar-accent/80" 
             : "bg-transparent text-sidebar-foreground hover:bg-sidebar-accent/50 dark:text-white/90 dark:hover:bg-sidebar-accent/30"
@@ -61,13 +60,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div 
       className={cn(
-        "bg-sidebar flex flex-col h-screen overflow-hidden border-r border-sidebar-border transition-all duration-300 dark:bg-gray-800 dark:border-gray-700",
+        "bg-sidebar flex-shrink-0 flex flex-col shadow-elevated overflow-hidden border-r border-sidebar-border transition-all duration-300 dark:bg-gray-800 dark:border-gray-700",
         collapsed ? "w-[70px]" : "w-64"
       )}
     >
-      {/* Header */}
-      <div className={cn("p-6 shrink-0", collapsed && "p-4 flex justify-center")}>
-        <Link to="/" className={cn("flex items-center gap-3", collapsed && "justify-center")}>
+      <div className={cn("p-6", collapsed && "p-4 flex justify-center")}>
+        <Link to="/" className={cn("flex items-center gap-3 transition-transform hover:scale-105", collapsed && "justify-center")}>
           <div className="h-8 w-8 rounded-md bg-white flex items-center justify-center text-sidebar">
             <span className="h-5 w-5 text-sidebar-background font-bold">M</span>
           </div>
@@ -79,25 +77,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </Link>
       </div>
       <Separator className="bg-sidebar-border/50 dark:bg-gray-700" />
-      
-      {/* Scrollable content area */}
-      <ScrollArea className="flex-1 px-3 py-2">
-        <div className="flex flex-col gap-1">
-          {navItems.map((item) => (
-            <SidebarItem
-              key={item.href}
-              icon={item.icon}
-              label={item.label}
-              href={item.href}
-              active={currentPath === item.href}
-              collapsed={collapsed}
-            />
-          ))}
-        </div>
-      </ScrollArea>
-      
-      {/* Footer with action buttons - always visible */}
-      <div className="p-4 bg-sidebar-accent/20 flex flex-col gap-2 shrink-0 mt-auto dark:bg-gray-700/50">
+      <div className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto scrollbar-none">
+        {navItems.map((item) => (
+          <SidebarItem
+            key={item.href}
+            icon={item.icon}
+            label={item.label}
+            href={item.href}
+            active={currentPath === item.href}
+            collapsed={collapsed}
+          />
+        ))}
+      </div>
+      <div className="p-4 bg-sidebar-accent/20 flex flex-col gap-2 dark:bg-gray-700/50">
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent/30 dark:text-white/90 dark:hover:bg-gray-600/30"
