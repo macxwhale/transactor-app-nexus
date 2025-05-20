@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -43,7 +44,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   ];
 
   return (
-    <div className="min-h-screen flex overflow-hidden bg-muted/30 dark:bg-gray-900">
+    <div className="flex h-screen overflow-hidden bg-muted/30 dark:bg-gray-900">
       {/* Sidebar */}
       <Sidebar 
         navItems={navItems}
@@ -55,7 +56,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top navigation */}
-        <header className="h-16 border-b border-border/40 bg-background/95 backdrop-blur-sm flex items-center justify-end px-6 gap-4 dark:border-gray-800 dark:bg-gray-900/95">
+        <header className="h-16 border-b border-border/40 bg-background/95 backdrop-blur-sm flex items-center justify-end px-6 gap-4 dark:border-gray-800 dark:bg-gray-900/95 shrink-0">
           <ThemeToggle />
           <Button variant="ghost" size="icon" className="rounded-full">
             <Bell className="h-5 w-5" />
@@ -74,9 +75,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
         
-        {/* Page content */}
-        <div className="flex-1 p-6 md:p-8 overflow-y-auto">
-          <div className="max-w-7xl mx-auto animate-fade-in">
+        {/* Page content - scrollable area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6 md:p-8 max-w-7xl mx-auto animate-fade-in">
             {children}
           </div>
         </div>
