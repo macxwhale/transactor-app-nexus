@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/sonner";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -45,7 +45,7 @@ const SidebarItem = ({ icon: Icon, label, href, active }: SidebarItemProps) => {
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { pathname } = useLocation();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = React.useState(false);
 
   const navItems = [
