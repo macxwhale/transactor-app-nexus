@@ -18,6 +18,10 @@ const Transactions = () => {
     // Search properties
     searchTerm,
     setSearchTerm,
+    // Filter properties
+    filters,
+    setFilters,
+    resetFilters,
     // Pagination properties
     currentPage,
     totalPages,
@@ -34,6 +38,10 @@ const Transactions = () => {
       <TransactionFilters 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
+        filters={filters}
+        onFiltersChange={setFilters}
+        applications={applications}
+        onResetFilters={resetFilters}
       />
 
       <TransactionTable

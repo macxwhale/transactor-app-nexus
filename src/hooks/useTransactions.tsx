@@ -4,22 +4,23 @@ import { useTransactionState } from "./useTransactionState";
 import { useApplicationsList } from "./useApplicationsList";
 import { useTransactionFetcher } from "./useTransactionFetcher";
 import { useTransactionPagination } from "./useTransactionPagination";
+import { useTransactionFilters } from "./useTransactionFilters";
+import { Transaction } from "@/lib/api";
 
 export function useTransactions() {
   const {
+    transactions,
     setTransactions,
     isLoading,
     setIsLoading,
     selectedTx,
     setSelectedTx,
-    filteredTransactions,
-    searchTerm,
-    setSearchTerm,
     isInitialized,
     setIsInitialized
   } = useTransactionState();
 
   const { applications } = useApplicationsList();
+  const { searchTerm, filters, setSearchTerm, setFilters, resetFilters } = useTransactionFilters();
   
   const { 
     transactions: fetchedTransactions, 
@@ -47,6 +48,9 @@ export function useTransactions() {
     }
   }, [applications.length, isInitialized, fetchTransactions, setIsInitialized]);
 
+  // Apply filters and search to transactions
+  const filteredTransactions = applyFilters(transactions, searchTerm, filters);
+
   // Use pagination with filtered transactions
   const {
     currentPage,
@@ -57,22 +61,25 @@ export function useTransactions() {
   } = useTransactionPagination(filteredTransactions);
 
   const refreshData = () => {
-    // When manually refreshing, we want to see the refresh state
     fetchTransactions(true);
   };
 
   return {
     // Return paginated transactions for display
     transactions: paginatedTransactions,
-    allTransactions: filteredTransactions,
     applications,
     isLoading,
     isRefreshing,
     error,
     selectedTx,
     setSelectedTx,
+    // Search and filters
     searchTerm,
     setSearchTerm,
+    filters,
+    setFilters,
+    resetFilters,
+    // Actions
     fetchData: refreshData,
     // Pagination
     currentPage,
@@ -80,4 +87,37 @@ export function useTransactions() {
     setCurrentPage,
     totalItems
   };
+}
+
+function applyFilters(
+  transactions: Transaction[],
+  searchTerm: string,
+  filters: { status: string; applicationId: string; startDate: string; endDate: string }
+): Transaction[] {
+  return transactions.filter(tx => {
+    // First apply search term
+    const matchesSearch = !searchTerm.trim() || [
+      tx.mpesa_receipt_number,
+      tx.phone_number,
+      tx.account_reference,
+      tx.application_name
+    ].some(field => field?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Then apply filters
+    const matchesStatus = !filters.status || tx.status === filters.status;
+    const matchesApp = !filters.applicationId || tx.application_id === filters.applicationId;
+    
+    // Date filtering
+    const txDate = tx.transaction_date ? new Date(tx.transaction_date) : null;
+    const startDate = filters.startDate ? new Date(filters.startDate) : null;
+    const endDate = filters.endDate ? new Date(filters.endDate) : null;
+    
+    const matchesDateRange = (
+      !startDate || !txDate || txDate >= startDate
+    ) && (
+      !endDate || !txDate || txDate <= new Date(endDate.setHours(23, 59, 59, 999))
+    );
+
+    return matchesSearch && matchesStatus && matchesApp && matchesDateRange;
+  });
 }
