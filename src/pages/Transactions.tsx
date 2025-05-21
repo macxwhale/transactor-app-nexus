@@ -3,6 +3,7 @@ import React from "react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { TransactionDetailsDialog } from "@/components/transactions/TransactionDetailsDialog";
+import { TransactionFilters } from "@/components/transactions/TransactionFilters";
 
 const Transactions = () => {
   const {
@@ -14,6 +15,9 @@ const Transactions = () => {
     selectedTx,
     setSelectedTx,
     fetchData,
+    // Search properties
+    searchTerm,
+    setSearchTerm,
     // Pagination properties
     currentPage,
     totalPages,
@@ -27,15 +31,18 @@ const Transactions = () => {
         <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
       </div>
 
+      <TransactionFilters 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
+
       <TransactionTable
         transactions={transactions}
         applications={applications}
         isLoading={isLoading}
         isRefreshing={isRefreshing}
         error={error}
-        onRefresh={() => {
-          fetchData();
-        }}
+        onRefresh={fetchData}
         onViewDetails={setSelectedTx}
         pagination={{
           currentPage,

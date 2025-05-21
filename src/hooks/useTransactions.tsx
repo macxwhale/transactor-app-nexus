@@ -13,6 +13,8 @@ export function useTransactions() {
     selectedTx,
     setSelectedTx,
     filteredTransactions,
+    searchTerm,
+    setSearchTerm,
     isInitialized,
     setIsInitialized
   } = useTransactionState();
@@ -69,6 +71,8 @@ export function useTransactions() {
     error,
     selectedTx,
     setSelectedTx,
+    searchTerm,
+    setSearchTerm,
     fetchData: refreshData,
     // Pagination
     currentPage,
