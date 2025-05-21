@@ -16,16 +16,16 @@ export interface FilterState {
 export function useTransactionFilters() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<TransactionFilters>({
-    status: "",
-    applicationId: "",
+    status: "all",
+    applicationId: "all",
     startDate: "",
     endDate: "",
   });
 
   const resetFilters = () => {
     setFilters({
-      status: "",
-      applicationId: "",
+      status: "all",
+      applicationId: "all",
       startDate: "",
       endDate: "",
     });

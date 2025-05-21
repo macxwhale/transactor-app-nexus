@@ -104,8 +104,8 @@ function applyFilters(
     ].some(field => field?.toLowerCase().includes(searchTerm.toLowerCase()));
 
     // Then apply filters
-    const matchesStatus = !filters.status || tx.status === filters.status;
-    const matchesApp = !filters.applicationId || tx.application_id === filters.applicationId;
+    const matchesStatus = filters.status === "all" || tx.status === filters.status;
+    const matchesApp = filters.applicationId === "all" || tx.application_id === filters.applicationId;
     
     // Date filtering
     const txDate = tx.transaction_date ? new Date(tx.transaction_date) : null;

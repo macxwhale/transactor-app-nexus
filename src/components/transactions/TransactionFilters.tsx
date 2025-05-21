@@ -75,7 +75,7 @@ export function TransactionFilters({
                     <SelectValue placeholder="Any status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any status</SelectItem>
+                    <SelectItem value="all">Any status</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="failed">Failed</SelectItem>
@@ -91,7 +91,7 @@ export function TransactionFilters({
                     <SelectValue placeholder="All applications" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All applications</SelectItem>
+                    <SelectItem value="all">All applications</SelectItem>
                     {applications.map(app => (
                       <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                     ))}
