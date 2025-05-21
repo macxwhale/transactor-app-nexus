@@ -39,9 +39,9 @@ jobs:
       - name: Switch to dist branch (create if doesn't exist)
         run: |
           git fetch origin
-          if git rev-parse --verify origin/dist; then
-            git checkout dist
-            git reset --hard origin/dist
+          if git show-ref --quiet refs/remotes/origin/dist; then
+            git checkout --detach origin/dist
+             git checkout -B dist
           else
             git checkout --orphan dist
           fi
