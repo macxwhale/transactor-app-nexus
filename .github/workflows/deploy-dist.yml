@@ -5,6 +5,9 @@ on:
     branches:
       - main   # change this to your source branch
 
+permissions:
+  contents: write
+
 jobs:
   deploy-dist:
     runs-on: ubuntu-latest
