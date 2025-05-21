@@ -31,10 +31,10 @@ jobs:
 
       - name: Copy build output to temp directory
         run: |
-          mkdir temp-dist
-          cp -r dist/* temp-dist/
-          # If hidden files are present in dist, use:
-          # cp -r dist/.[!.]* temp-dist/
+          mkdir -p /tmp/temp-dist
+          cp -r dist/* /tmp/temp-dist/
+          # If hidden files are needed:
+          # cp -r dist/.[!.]* /tmp/temp-dist/
 
       - name: Switch to dist branch (create if doesn't exist)
         run: |
@@ -42,7 +42,7 @@ jobs:
           git reset --hard  # Discard uncommitted changes (like package-lock.json)
           if git show-ref --quiet refs/remotes/origin/dist; then
             git checkout --detach origin/dist
-             git checkout -B dist
+            git checkout -B dist
           else
             git checkout --orphan dist
           fi
@@ -53,7 +53,7 @@ jobs:
 
       - name: Copy files from temp-dist to root
         run: |
-          cp -r ../temp-dist/* .
+          cp -r /tmp/temp-dist/* .
 
       - name: Configure Git
         run: |
