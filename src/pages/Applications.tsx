@@ -33,7 +33,10 @@ const Applications = () => {
     currentPage,
     totalPages,
     setCurrentPage,
-    allApplicationsCount
+    allApplicationsCount,
+    filteredCount,
+    searchTerm,
+    setSearchTerm
   } = useApplications();
 
   return (
@@ -46,6 +49,8 @@ const Applications = () => {
         handleCreateApplication={handleCreateApplication}
         isSubmitting={isSubmitting}
         totalApplications={allApplicationsCount}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
       />
 
       <ApplicationsTable 
@@ -59,6 +64,7 @@ const Applications = () => {
         onToggleStatus={(app) => openStatusDialog(app.id, !app.is_active)}
       />
 
+      {/* Dialogs */}
       <CreateApplicationDialog 
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}

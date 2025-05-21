@@ -7,6 +7,7 @@ import { useApplicationUpdate } from "./useApplicationUpdate";
 import { useApplicationToggle } from "./useApplicationToggle";
 import { useApplicationDelete } from "./useApplicationDelete";
 import { useApplicationPagination } from "./useApplicationPagination";
+import { useApplicationSearch } from "./useApplicationSearch";
 
 export function useApplications() {
   // Initialize the state hook
@@ -27,6 +28,9 @@ export function useApplications() {
       setIsLoading(false);
     }
   };
+
+  // Search functionality
+  const { searchTerm, setSearchTerm, filteredApplications } = useApplicationSearch(applications);
 
   // Initialize the specialized hooks
   const { 
@@ -60,14 +64,14 @@ export function useApplications() {
     isDeleting
   } = useApplicationDelete(fetchApps);
 
-  // Use pagination hook with all applications (not pre-paginated data)
+  // Use pagination hook with filtered applications
   const { 
     currentPage, 
     totalPages, 
     setCurrentPage,
     paginatedApplications,
     totalItems
-  } = useApplicationPagination(applications);
+  } = useApplicationPagination(filteredApplications);
   
   // Combine submission states
   const isSubmitting = isCreateSubmitting || isUpdateSubmitting || isDeleting;
@@ -80,7 +84,8 @@ export function useApplications() {
   return {
     // Return paginated applications for display
     applications: paginatedApplications, 
-    allApplicationsCount: totalItems,
+    allApplicationsCount: applications.length,
+    filteredCount: totalItems,
     isLoading,
     editingApp,
     isDialogOpen,
@@ -102,6 +107,8 @@ export function useApplications() {
     openDeleteDialog,
     currentPage,
     totalPages,
-    setCurrentPage
+    setCurrentPage,
+    searchTerm,
+    setSearchTerm
   };
 }
