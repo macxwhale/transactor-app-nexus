@@ -42,9 +42,9 @@ jobs:
       - name: Switch to dist branch (or create it)
         run: |
           if git rev-parse --verify origin/dist; then
-            git checkout dist
+            git checkout  origin/dist
           else
-            git checkout --orphan dist
+            git checkout --orphan  origin/dist
           fi
 
       - name: Clean old contents
