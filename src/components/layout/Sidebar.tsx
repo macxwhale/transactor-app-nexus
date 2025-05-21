@@ -1,10 +1,12 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { ChevronRight, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -57,6 +59,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
   setCollapsed
 }) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
+
   return (
     <div 
       className={cn(
@@ -101,6 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent/30 dark:text-white/90 dark:hover:bg-gray-600/30"
+          onClick={handleLogout}
         >
           <LogOut size={18} />
           {!collapsed && <span>Sign Out</span>}

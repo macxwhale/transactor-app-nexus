@@ -1,11 +1,13 @@
+
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart3,
   CreditCard,
   LayoutDashboard,
   Settings,
   Bell,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -13,11 +15,21 @@ import { Toaster } from "@/components/ui/sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sidebar } from "./Sidebar";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = React.useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
 
   const navItems = [
     {
@@ -42,6 +54,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     },
   ];
 
+  // Get first letter of username for avatar
+  const userInitial = user?.username ? user.username[0].toUpperCase() : "U";
+
   return (
     <div className="min-h-screen flex overflow-hidden bg-muted/30 dark:bg-gray-900">
       {/* Sidebar */}
@@ -63,14 +78,17 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           <Separator orientation="vertical" className="h-8" />
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary dark:bg-primary/10">
-              <span className="font-semibold text-sm">JD</span>
+              <span className="font-semibold text-sm">{userInitial}</span>
             </div>
             {!isMobile && (
               <div className="text-sm">
-                <p className="font-medium">John Doe</p>
+                <p className="font-medium">{user?.username || "User"}</p>
                 <p className="text-muted-foreground text-xs">Administrator</p>
               </div>
             )}
+            <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+              <LogOut className="h-5 w-5" />
+            </Button>
           </div>
         </header>
         
