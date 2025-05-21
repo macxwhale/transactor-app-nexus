@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Filter } from "lucide-react";
-import { Application, TransactionFilters as TFilters } from "@/lib/api";
+import { Application } from "@/lib/api";
 import TransactionSearch from "./TransactionSearch";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,11 +14,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
+interface TransactionFilters {
+  status: string;
+  applicationId: string;
+  startDate: string;
+  endDate: string;
+}
+
 interface TransactionFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  filters: TFilters;
-  onFiltersChange: (filters: TFilters) => void;
+  filters: TransactionFilters;
+  onFiltersChange: (filters: TransactionFilters) => void;
   applications: Application[];
   onResetFilters: () => void;
 }
@@ -31,7 +38,7 @@ export function TransactionFilters({
   applications,
   onResetFilters
 }: TransactionFiltersProps) {
-  const updateFilter = (key: keyof TFilters, value: string) => {
+  const updateFilter = (key: keyof TransactionFilters, value: string) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
