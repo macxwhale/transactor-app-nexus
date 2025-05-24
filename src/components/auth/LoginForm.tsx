@@ -4,23 +4,47 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { loginFormSchema, sanitizeInput, validateField, emailSchema } from "@/utils/validation";
 
 export const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const validateForm = () => {
+    const emailError = validateField(emailSchema, username);
+    const passwordError = password.length === 0 ? 'Password is required' : null;
+    
+    setErrors({
+      email: emailError,
+      password: passwordError,
+    });
+
+    return !emailError && !passwordError;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error("Please fix the errors before submitting");
+      return;
+    }
+
     setIsLoading(true);
+
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(username);
+    const sanitizedPassword = sanitizeInput(password);
 
     // Simulate network delay
     setTimeout(() => {
-      const success = login(username, password);
+      const success = login(sanitizedEmail, sanitizedPassword);
       
       if (success) {
         toast.success("Login successful", {
@@ -36,6 +60,23 @@ export const LoginForm = () => {
     }, 800);
   };
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsername(value);
+    if (errors.email && value) {
+      const emailError = validateField(emailSchema, value);
+      setErrors(prev => ({ ...prev, email: emailError }));
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    if (errors.password && value) {
+      setErrors(prev => ({ ...prev, password: null }));
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <CardContent className="space-y-4">
@@ -48,9 +89,13 @@ export const LoginForm = () => {
             type="email"
             placeholder="info@bunisystems.com"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={handleEmailChange}
             required
+            className={errors.email ? 'border-destructive' : ''}
           />
+          {errors.email && (
+            <p className="text-sm text-destructive">{errors.email}</p>
+          )}
         </div>
         <div className="space-y-2">
           <label htmlFor="password" className="text-sm font-medium">
@@ -61,9 +106,13 @@ export const LoginForm = () => {
             type="password"
             placeholder="••••••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             required
+            className={errors.password ? 'border-destructive' : ''}
           />
+          {errors.password && (
+            <p className="text-sm text-destructive">{errors.password}</p>
+          )}
         </div>
       </CardContent>
       <CardFooter>
