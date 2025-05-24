@@ -5,6 +5,7 @@ import { FixedSizeList as List } from "react-window";
 interface VirtualizedListProps<T> {
   items: T[];
   height: number;
+  width?: number | string;
   itemHeight: number;
   renderItem: ({ index, style }: { index: number; style: React.CSSProperties }) => React.ReactNode;
   className?: string;
@@ -13,6 +14,7 @@ interface VirtualizedListProps<T> {
 export function VirtualizedList<T>({
   items,
   height,
+  width = "100%",
   itemHeight,
   renderItem,
   className
@@ -36,6 +38,7 @@ export function VirtualizedList<T>({
   return (
     <List
       height={height}
+      width={width}
       itemCount={memoizedItems.length}
       itemSize={itemHeight}
       className={className}
