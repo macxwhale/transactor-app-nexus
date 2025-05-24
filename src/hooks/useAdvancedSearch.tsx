@@ -27,7 +27,7 @@ export function useAdvancedSearch<T>(
   const { searchableFields, filterableFields, persistenceKey } = config;
 
   // Use state persistence if key is provided
-  const { state: persistedState, setState: setPersistedState } = useStatePersistence({
+  const { state: persistedState, setState: setPersistedState } = useStatePersistence<SearchState>({
     key: persistenceKey || 'advanced_search',
     defaultValue: {
       query: '',
