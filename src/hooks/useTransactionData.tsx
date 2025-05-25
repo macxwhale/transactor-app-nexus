@@ -14,23 +14,19 @@ export function useTransactionData() {
     isLoading, 
     error,
     fetchTransactions
-  } = useTransactionFetcher(applications);
+  } = useTransactionFetcher();
 
   // Memoize the fetchData function to prevent unnecessary rerenders
   const fetchData = useCallback(() => {
-    if (applications.length > 0) { // Only fetch if applications are loaded
-      fetchTransactions();
-    }
-  }, [applications, fetchTransactions]);
+    console.log("Fetching transaction data...");
+    fetchTransactions();
+  }, [fetchTransactions]);
 
-  // Fetch data when applications load
+  // Fetch data immediately on component mount
   useEffect(() => {
-    if (applications.length === 0) {
-      return; // Don't try to fetch if no applications loaded yet
-    }
-    
+    console.log("useTransactionData initialized, fetching data...");
     fetchData();
-  }, [applications.length, fetchData]);
+  }, [fetchData]);
 
   return {
     transactions,

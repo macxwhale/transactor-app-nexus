@@ -1,11 +1,11 @@
 
 import { useState } from "react";
-import { Transaction, Application } from "@/lib/api";
+import { Transaction } from "@/lib/api";
 import { toast } from "sonner";
 import { normalizeStatus } from "@/utils/transactionUtils";
 import { useTransactionQueries } from "./useTransactionQueries";
 
-export function useTransactionFetcher(applications: Application[]) {
+export function useTransactionFetcher() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +31,7 @@ export function useTransactionFetcher(applications: Application[]) {
       const { data: txData, error: txError } = await dataQuery;
       
       if (txError) {
+        console.error("Supabase transaction fetch error:", txError);
         throw txError;
       }
 
@@ -55,7 +56,7 @@ export function useTransactionFetcher(applications: Application[]) {
           status: status,
           transaction_date: tx.transaction_date ? tx.transaction_date.toString() : '',
           application_id: tx.app_id || '',
-          application_name: applications.find(app => app.id === tx.app_id)?.name || `App ID: ${tx.app_id}`,
+          application_name: tx.app_id ? `App: ${tx.app_id}` : 'Unknown App',
           created_at: tx.created_at ? new Date(tx.created_at).toISOString() : new Date().toISOString(),
           updated_at: tx.updated_at ? new Date(tx.updated_at).toISOString() : new Date().toISOString(),
           
@@ -75,8 +76,9 @@ export function useTransactionFetcher(applications: Application[]) {
       
     } catch (error) {
       console.error("Failed to fetch transaction data:", error);
-      setError("Failed to fetch transaction data. Please try again.");
-      toast.error("Failed to fetch data. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch transaction data. Please try again.";
+      setError(errorMessage);
+      toast.error("Failed to fetch transaction data. Please check your connection and try again.");
       // Reset to empty array to avoid showing stale data
       setTransactions([]);
     } finally {

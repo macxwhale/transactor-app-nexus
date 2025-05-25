@@ -8,6 +8,7 @@ export function useApplicationsList() {
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
 
   const fetchApplications = async () => {
+    console.log("Fetching applications from Supabase...");
     try {
       // Fetch applications from Supabase
       const { data: appsData, error: appsError } = await supabase
@@ -15,11 +16,14 @@ export function useApplicationsList() {
         .select('id, name, is_active, business_short_code, app_id, app_secret');
       
       if (appsError) {
+        console.error("Supabase applications error:", appsError);
         throw appsError;
       }
       
+      console.log(`Fetched ${appsData?.length || 0} applications`);
+      
       // Convert Supabase applications data to our Application type
-      const formattedApps: Application[] = appsData.map(app => ({
+      const formattedApps: Application[] = (appsData || []).map(app => ({
         id: app.id,
         name: app.name,
         callback_url: '',
@@ -40,6 +44,7 @@ export function useApplicationsList() {
       setApplications(formattedApps);
     } catch (error) {
       console.error("Failed to fetch applications:", error);
+      setApplications([]); // Set empty array on error
     } finally {
       setIsLoadingApplications(false);
     }

@@ -1,9 +1,7 @@
 
-import { useState, useEffect } from "react";
-import { Transaction } from "@/lib/api";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useApplicationsList } from "@/hooks/useApplicationsList";
-import { toast } from "sonner";
+import { normalizeStatus } from "@/utils/transactionUtils";
 
 interface DashboardStats {
   totalTransactions: number;
@@ -13,181 +11,161 @@ interface DashboardStats {
   failedTransactions: number;
   dailyStats: Array<{ date: string; count: number; amount: number }>;
   topApplications: Array<{ name: string; transactions: number; amount: number }>;
-  recentTransactions: Transaction[];
+  recentTransactions: any[];
 }
 
 export function useDashboardStats() {
-  const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const { applications } = useApplicationsList();
+  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
+    console.log("Fetching dashboard stats...");
     setIsLoading(true);
+
     try {
-      console.log("Fetching transactions for dashboard stats...");
-      
-      // Fetch transactions from Supabase
+      // Fetch transactions data
       const { data: transactions, error: txError } = await supabase
         .from('transactions')
-        .select('*');
-      
+        .select('*')
+        .order('created_at', { ascending: false });
+
       if (txError) {
+        console.error("Error fetching transactions:", txError);
         throw txError;
       }
+
+      // Fetch applications data (optional, don't fail if empty)
+      const { data: applications } = await supabase
+        .from('applications')
+        .select('*');
+
+      console.log(`Fetched ${transactions?.length || 0} transactions and ${applications?.length || 0} applications`);
+
+      if (!transactions || transactions.length === 0) {
+        console.log("No transactions found, setting empty stats");
+        setStats({
+          totalTransactions: 0,
+          totalAmount: 0,
+          completedTransactions: 0,
+          pendingTransactions: 0,
+          failedTransactions: 0,
+          dailyStats: [],
+          topApplications: [],
+          recentTransactions: []
+        });
+        return;
+      }
+
+      // Create application lookup map
+      const appLookup = (applications || []).reduce((acc, app) => {
+        acc[app.id] = app.name;
+        return acc;
+      }, {} as Record<string, string>);
+
+      // Calculate stats
+      const totalTransactions = transactions.length;
+      const totalAmount = transactions.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
       
-      console.log(`Fetched ${transactions?.length || 0} transactions for dashboard`);
-      
-      // Calculate statistics from actual data
-      const totalTransactions = transactions?.length || 0;
-      const totalAmount = transactions?.reduce((sum, tx) => sum + Number(tx.amount || 0), 0) || 0;
-      
-      const completedTransactions = transactions?.filter(tx => 
-        tx.status?.toLowerCase() === 'completed').length || 0;
-        
-      const pendingTransactions = transactions?.filter(tx => 
-        tx.status?.toLowerCase() === 'pending' || tx.status?.toLowerCase() === 'processing').length || 0;
-        
-      const failedTransactions = transactions?.filter(tx => 
-        tx.status?.toLowerCase() === 'failed').length || 0;
-      
-      // Generate daily stats from actual data
-      const dailyMap = new Map();
-      
-      transactions?.forEach(tx => {
-        if (tx.transaction_date) {
-          try {
-            // Handle transaction_date as a Unix timestamp (seconds)
-            let dateObj;
-            
-            // Check if transaction_date is already a number
-            if (typeof tx.transaction_date === 'number') {
-              // If it's in seconds (Unix timestamp), convert to milliseconds
-              dateObj = new Date(tx.transaction_date * 1000);
-            } else {
-              // If it's a string, parse it
-              const timestamp = parseInt(String(tx.transaction_date), 10);
-              if (!isNaN(timestamp)) {
-                dateObj = new Date(timestamp * 1000);
-              } else {
-                // If parsing fails, use current date
-                console.warn("Invalid transaction_date:", tx.transaction_date);
-                dateObj = new Date();
-              }
-            }
-            
-            // Format date as YYYY-MM-DD
-            const dateStr = dateObj.toISOString().split('T')[0];
-            
-            if (!dailyMap.has(dateStr)) {
-              dailyMap.set(dateStr, { count: 0, amount: 0 });
-            }
-            
-            const entry = dailyMap.get(dateStr);
-            entry.count += 1;
-            entry.amount += Number(tx.amount || 0);
-          } catch (err) {
-            console.error("Error processing transaction date:", tx.transaction_date, err);
-          }
-        }
-      });
-      
-      // Convert map to array and sort by date
-      const dailyStats = Array.from(dailyMap.entries()).map(([date, data]) => ({
-        date,
-        count: data.count,
-        amount: data.amount
-      })).sort((a, b) => a.date.localeCompare(b.date));
-      
-      // Get most recent 7 days or all days if less than 7
-      const recentDailyStats = dailyStats.slice(-7);
-      
-      // Calculate top applications
-      const appMap = new Map();
-      
-      transactions?.forEach(tx => {
+      const statusCounts = transactions.reduce((acc, tx) => {
+        const status = normalizeStatus(tx.status);
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const completedTransactions = statusCounts['completed'] || 0;
+      const pendingTransactions = statusCounts['pending'] || 0;
+      const failedTransactions = statusCounts['failed'] || 0;
+
+      // Daily stats (last 7 days)
+      const dailyStats = generateDailyStats(transactions);
+
+      // Top applications
+      const appStats = transactions.reduce((acc, tx) => {
         const appId = tx.app_id || 'unknown';
+        const appName = appLookup[appId] || `App: ${appId}`;
         
-        if (!appMap.has(appId)) {
-          appMap.set(appId, { 
-            transactions: 0, 
-            amount: 0,
-            name: applications.find(app => app.id === appId)?.name || `App ID: ${appId}`
-          });
+        if (!acc[appName]) {
+          acc[appName] = { transactions: 0, amount: 0 };
         }
-        
-        const entry = appMap.get(appId);
-        entry.transactions += 1;
-        entry.amount += Number(tx.amount || 0);
-      });
-      
-      // Convert to array and sort by transaction count
-      const topApplications = Array.from(appMap.values())
+        acc[appName].transactions += 1;
+        acc[appName].amount += Number(tx.amount || 0);
+        return acc;
+      }, {} as Record<string, { transactions: number; amount: number }>);
+
+      const topApplications = Object.entries(appStats)
+        .map(([name, stats]) => ({ name, ...stats }))
         .sort((a, b) => b.transactions - a.transactions)
         .slice(0, 5);
-      
-      // Get recent transactions
-      const recentTransactions = transactions
-        ?.sort((a, b) => {
-          // Sort by created_at if available, otherwise by transaction_date
-          const dateA = a.created_at ? new Date(a.created_at).getTime() : (a.transaction_date || 0);
-          const dateB = b.created_at ? new Date(b.created_at).getTime() : (b.transaction_date || 0);
-          return dateB - dateA;
-        })
-        .slice(0, 5)
-        .map(tx => {
-          // Format transactions to match our expected type
-          return {
-            id: tx.id,
-            mpesa_receipt_number: tx.mpesa_receipt_number || '',
-            phone_number: tx.phone_number || '',
-            amount: Number(tx.amount || 0),
-            status: tx.status?.toLowerCase() || 'pending',
-            transaction_date: tx.transaction_date ? tx.transaction_date.toString() : '',
-            application_id: tx.app_id || '',
-            application_name: applications.find(app => app.id === tx.app_id)?.name || `App ID: ${tx.app_id}`,
-            created_at: tx.created_at ? new Date(tx.created_at).toISOString() : new Date().toISOString(),
-            updated_at: tx.updated_at ? new Date(tx.updated_at).toISOString() : new Date().toISOString(),
-            
-            // Include additional fields with null handling
-            account_reference: tx.account_reference || '',
-            transaction_desc: tx.transaction_desc || '',
-            result_code: tx.result_code,
-            result_desc: tx.result_desc || '',
-            checkout_request_id: tx.checkout_request_id || '',
-            merchant_request_id: tx.merchant_request_id || '',
-            completed_at: tx.completed_at ? new Date(tx.completed_at).toISOString() : undefined
-          } as Transaction;
-        }) || [];
 
-      // Assemble stats object
-      const dashboardStats = {
+      // Recent transactions (last 10)
+      const recentTransactions = transactions
+        .slice(0, 10)
+        .map(tx => ({
+          ...tx,
+          application_name: appLookup[tx.app_id] || `App: ${tx.app_id || 'Unknown'}`
+        }));
+
+      const newStats = {
         totalTransactions,
         totalAmount,
         completedTransactions,
         pendingTransactions,
         failedTransactions,
-        dailyStats: recentDailyStats,
+        dailyStats,
         topApplications,
         recentTransactions
       };
-      
-      console.log("Dashboard stats processed successfully");
-      setStats(dashboardStats);
+
+      console.log("Dashboard stats calculated:", newStats);
+      setStats(newStats);
+
     } catch (error) {
       console.error("Failed to fetch dashboard stats:", error);
-      toast.error("Could not load dashboard data");
-      setStats(null);
+      // Set empty stats on error
+      setStats({
+        totalTransactions: 0,
+        totalAmount: 0,
+        completedTransactions: 0,
+        pendingTransactions: 0,
+        failedTransactions: 0,
+        dailyStats: [],
+        topApplications: [],
+        recentTransactions: []
+      });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // Only fetch stats when applications are loaded
-    if (applications.length > 0) {
-      fetchStats();
-    }
-  }, [applications.length]);
+    fetchStats();
+  }, [fetchStats]);
 
-  return { stats, isLoading, fetchStats };
+  return {
+    stats,
+    isLoading,
+    fetchStats
+  };
+}
+
+function generateDailyStats(transactions: any[]) {
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    return date.toISOString().split('T')[0];
+  }).reverse();
+
+  return last7Days.map(date => {
+    const dayTransactions = transactions.filter(tx => {
+      if (!tx.created_at) return false;
+      const txDate = new Date(tx.created_at).toISOString().split('T')[0];
+      return txDate === date;
+    });
+
+    return {
+      date,
+      count: dayTransactions.length,
+      amount: dayTransactions.reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
+    };
+  });
 }

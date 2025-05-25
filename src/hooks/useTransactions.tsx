@@ -28,7 +28,7 @@ export function useTransactions() {
     isRefreshing,
     error,
     fetchTransactions
-  } = useTransactionFetcher(applications);
+  } = useTransactionFetcher();
   
   // Effect to update transactions when fetched
   useEffect(() => {
@@ -40,16 +40,17 @@ export function useTransactions() {
     setIsLoading(isFetching);
   }, [isFetching, setIsLoading]);
   
-  // Fetch data when applications load, but only on first load
+  // Fetch data immediately on component mount, don't wait for applications
   useEffect(() => {
-    if (applications.length > 0 && !isInitialized) {
+    if (!isInitialized) {
+      console.log("Initializing transactions fetch...");
       fetchTransactions(false);
       setIsInitialized(true);
     }
-  }, [applications.length, isInitialized, fetchTransactions, setIsInitialized]);
+  }, [isInitialized, fetchTransactions, setIsInitialized]);
 
   // Apply filters and search to transactions
-  const filteredTransactions = applyFilters(transactions, searchTerm, filters);
+  const filteredTransactions = applyFilters(transactions, searchTerm, filters, applications);
 
   // Use pagination with filtered transactions
   const {
@@ -61,6 +62,7 @@ export function useTransactions() {
   } = useTransactionPagination(filteredTransactions);
 
   const refreshData = () => {
+    console.log("Refreshing transaction data...");
     fetchTransactions(true);
   };
 
@@ -92,7 +94,8 @@ export function useTransactions() {
 function applyFilters(
   transactions: Transaction[],
   searchTerm: string,
-  filters: { status: string; applicationId: string; startDate: string; endDate: string }
+  filters: { status: string; applicationId: string; startDate: string; endDate: string },
+  applications: any[] = []
 ): Transaction[] {
   return transactions.filter(tx => {
     // First apply search term
