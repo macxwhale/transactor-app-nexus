@@ -11,7 +11,7 @@ import Dashboard from "@/pages/Dashboard";
 import Applications from "@/pages/Applications";
 import Transactions from "@/pages/Transactions";
 import Configuration from "@/pages/Configuration";
-import Auth from "@/pages/Auth";
+import Login from "@/pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -25,18 +25,10 @@ const queryClient = new QueryClient({
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
+  const { isAuthenticated } = useAuth();
   
   if (!isAuthenticated) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/login" replace />;
   }
   
   return <>{children}</>;
@@ -48,7 +40,7 @@ const AppContent = () => {
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/login" element={<Login />} />
           
           <Route 
             path="/" 
