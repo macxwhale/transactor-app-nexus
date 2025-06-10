@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeStatus } from "@/utils/transactionUtils";
+import { safeToISOString } from "@/utils/dateUtils";
 
 interface DashboardStats {
   totalTransactions: number;
@@ -76,7 +77,7 @@ export function useDashboardStats() {
       const pendingTransactions = statusCounts['pending'] || 0;
       const failedTransactions = statusCounts['failed'] || 0;
 
-      // Daily stats (last 7 days)
+      // Daily stats (last 7 days) with safe date handling
       const dailyStats = generateDailyStats(transactions);
 
       // Top applications
@@ -97,13 +98,26 @@ export function useDashboardStats() {
         .sort((a, b) => b.transactions - a.transactions)
         .slice(0, 5);
 
-      // Recent transactions (last 10)
+      // Recent transactions (last 10) with safe date conversion
       const recentTransactions = transactions
         .slice(0, 10)
-        .map(tx => ({
-          ...tx,
-          application_name: appLookup[tx.app_id] || `App: ${tx.app_id || 'Unknown'}`
-        }));
+        .map(tx => {
+          try {
+            return {
+              ...tx,
+              application_name: appLookup[tx.app_id] || `App: ${tx.app_id || 'Unknown'}`,
+              created_at: safeToISOString(tx.created_at) || tx.created_at,
+              updated_at: safeToISOString(tx.updated_at) || tx.updated_at,
+              completed_at: safeToISOString(tx.completed_at) || tx.completed_at
+            };
+          } catch (error) {
+            console.error("Error processing recent transaction:", tx.id, error);
+            return {
+              ...tx,
+              application_name: appLookup[tx.app_id] || `App: ${tx.app_id || 'Unknown'}`
+            };
+          }
+        });
 
       const newStats = {
         totalTransactions,
@@ -158,8 +172,15 @@ function generateDailyStats(transactions: any[]) {
   return last7Days.map(date => {
     const dayTransactions = transactions.filter(tx => {
       if (!tx.created_at) return false;
-      const txDate = new Date(tx.created_at).toISOString().split('T')[0];
-      return txDate === date;
+      try {
+        const createdAtISO = safeToISOString(tx.created_at);
+        if (!createdAtISO) return false;
+        const txDate = new Date(createdAtISO).toISOString().split('T')[0];
+        return txDate === date;
+      } catch (error) {
+        console.error("Error filtering transaction by date:", tx.id, error);
+        return false;
+      }
     });
 
     return {

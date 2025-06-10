@@ -1,6 +1,7 @@
 
 import { Transaction } from "@/lib/api";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { formatDateSafely } from "./dateUtils";
 
 /**
  * Helper function to display "N/A" for null or undefined values
@@ -13,15 +14,10 @@ export const displayValue = (value: any, formatter?: (val: any) => string) => {
 };
 
 /**
- * Format transaction date properly, handling numeric string conversion
+ * Format transaction date using safe date handling
  */
 export const formatTransactionDate = (dateValue: any) => {
-  // Convert to number if it's a string representation of a number
-  const parsedDate = dateValue && !isNaN(Number(dateValue)) 
-    ? Number(dateValue) 
-    : dateValue;
-    
-  return displayValue(parsedDate, formatDate);
+  return formatDateSafely(dateValue);
 };
 
 /**
@@ -30,4 +26,3 @@ export const formatTransactionDate = (dateValue: any) => {
 export const formatTransactionAmount = (amount: any) => {
   return displayValue(amount, formatCurrency);
 };
-

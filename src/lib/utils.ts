@@ -1,6 +1,6 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { formatDateSafely } from "@/utils/dateUtils"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -15,56 +15,9 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-// Format date
+// Format date - now using the safe date formatting
 export function formatDate(dateInput: string | number | null | undefined): string {
-  // Return N/A for null, undefined or empty values
-  if (dateInput === null || dateInput === undefined || dateInput === '') {
-    return "N/A";
-  }
-  
-  try {
-    let date: Date;
-    
-    // If the input is a number (timestamp), handle different formats
-    if (typeof dateInput === 'number') {
-      // Check if it's an M-Pesa timestamp in format YYYYMMDDHHMMSS
-      if (dateInput > 20000000000000) {
-        const timestampStr = dateInput.toString();
-        const year = parseInt(timestampStr.substring(0, 4));
-        const month = parseInt(timestampStr.substring(4, 6)) - 1; // JS months are 0-indexed
-        const day = parseInt(timestampStr.substring(6, 8));
-        const hour = parseInt(timestampStr.substring(8, 10));
-        const minute = parseInt(timestampStr.substring(10, 12));
-        const second = parseInt(timestampStr.substring(12, 14));
-        
-        date = new Date(year, month, day, hour, minute, second);
-      }
-      // Check if it's in seconds (Unix timestamp) and convert to milliseconds if needed
-      else if (dateInput < 10000000000) {
-        date = new Date(dateInput * 1000); // Convert seconds to milliseconds
-      } else {
-        date = new Date(dateInput); // Already in milliseconds
-      }
-    } else {
-      date = new Date(dateInput);
-    }
-    
-    // Check if the date is valid
-    if (isNaN(date.getTime())) {
-      return "N/A";
-    }
-    
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    }).format(date);
-  } catch (error) {
-    console.error("Date formatting error:", error);
-    return "N/A";
-  }
+  return formatDateSafely(dateInput);
 }
 
 // Format phone number (Kenyan format)
