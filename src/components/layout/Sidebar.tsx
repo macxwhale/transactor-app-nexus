@@ -1,123 +1,96 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { ChevronRight, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import {
+  Home,
+  Settings,
+  CreditCard,
+  Users,
+  LogOut,
+  User
+} from "lucide-react";
 
-interface SidebarItemProps {
-  icon: React.ElementType;
-  label: string;
-  href: string;
-  active?: boolean;
-  collapsed: boolean;
-}
+const navigation = [
+  { name: "Dashboard", href: "/", icon: Home },
+  { name: "Applications", href: "/applications", icon: Users },
+  { name: "Transactions", href: "/transactions", icon: CreditCard },
+  { name: "Configuration", href: "/config", icon: Settings },
+];
 
-export const SidebarItem = ({ 
-  icon: Icon, 
-  label, 
-  href, 
-  active,
-  collapsed
-}: SidebarItemProps) => {
-  return (
-    <Link to={href}>
-      <Button
-        variant="ghost"
-        className={cn(
-          "w-full justify-start gap-3 font-medium transition-all duration-200",
-          active 
-            ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-md dark:bg-sidebar-accent/80" 
-            : "bg-transparent text-sidebar-foreground hover:bg-sidebar-accent/50 dark:text-white/90 dark:hover:bg-sidebar-accent/30"
-        )}
-      >
-        <Icon size={18} className={active ? "animate-pulse" : ""} />
-        {!collapsed && <span className={active ? "font-semibold" : ""}>{label}</span>}
-        {active && !collapsed && <ChevronRight className="ml-auto h-4 w-4" />}
-      </Button>
-    </Link>
-  );
-};
-
-interface SidebarProps {
-  navItems: Array<{
-    icon: React.ElementType;
-    label: string;
-    href: string;
-  }>;
-  currentPath: string;
-  collapsed: boolean;
-  setCollapsed: (value: boolean) => void;
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({
-  navItems,
-  currentPath,
-  collapsed,
-  setCollapsed
-}) => {
-  const { logout } = useAuth();
+const Sidebar = () => {
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  
-  const handleLogout = () => {
-    logout();
-    toast.success("Logged out successfully");
-    navigate("/login");
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
   };
 
   return (
-    <div 
-      className={cn(
-        "bg-sidebar flex-shrink-0 flex flex-col shadow-elevated overflow-hidden border-r border-sidebar-border transition-all duration-300 dark:bg-gray-800 dark:border-gray-700",
-        collapsed ? "w-[70px]" : "w-64"
-      )}
-    >
-      <div className={cn("p-6", collapsed && "p-4 flex justify-center")}>
-        <Link to="/" className={cn("flex items-center gap-3 transition-transform hover:scale-105", collapsed && "justify-center")}>
-          <div className="h-8 w-8 rounded-md bg-white flex items-center justify-center text-sidebar">
-            <span className="h-5 w-5 text-sidebar-background font-bold">M</span>
-          </div>
-          {!collapsed && (
-            <span className="text-xl font-bold text-sidebar-foreground dark:text-white">
-              M-Pesa
-            </span>
-          )}
-        </Link>
+    <div className="flex h-full w-64 flex-col bg-white shadow-lg dark:bg-gray-800">
+      {/* Logo/Brand */}
+      <div className="flex h-16 items-center justify-center border-b border-gray-200 dark:border-gray-700">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          Payment Portal
+        </h1>
       </div>
-      <Separator className="bg-sidebar-border/50 dark:bg-gray-700" />
-      <div className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto scrollbar-none">
-        {navItems.map((item) => (
-          <SidebarItem
-            key={item.href}
-            icon={item.icon}
-            label={item.label}
-            href={item.href}
-            active={currentPath === item.href}
-            collapsed={collapsed}
-          />
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 px-2 py-4">
+        {navigation.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.href}
+            className={({ isActive }) =>
+              cn(
+                "group flex items-center rounded-md px-2 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+              )
+            }
+          >
+            <item.icon
+              className="mr-3 h-5 w-5 flex-shrink-0"
+              aria-hidden="true"
+            />
+            {item.name}
+          </NavLink>
         ))}
-      </div>
-      <div className="p-4 bg-sidebar-accent/20 flex flex-col gap-2 dark:bg-gray-700/50">
+      </nav>
+
+      {/* User Info & Logout */}
+      <div className="border-t border-gray-200 p-4 dark:border-gray-700">
+        <div className="flex items-center space-x-3 mb-3">
+          <div className="flex-shrink-0">
+            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+              <User className="h-4 w-4 text-white" />
+            </div>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              {user?.email || "User"}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Authenticated
+            </p>
+          </div>
+        </div>
         <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent/30 dark:text-white/90 dark:hover:bg-gray-600/30"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={handleSignOut}
+          variant="outline"
+          size="sm"
+          className="w-full justify-start"
         >
-          <ChevronRight className={cn("h-5 w-5 transition-all", collapsed && "rotate-180")} />
-          {!collapsed && <span>Collapse</span>}
-        </Button>
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent/30 dark:text-white/90 dark:hover:bg-gray-600/30"
-          onClick={handleLogout}
-        >
-          <LogOut size={18} />
-          {!collapsed && <span>Sign Out</span>}
+          <LogOut className="mr-2 h-4 w-4" />
+          Sign Out
         </Button>
       </div>
     </div>
   );
 };
+
+export default Sidebar;

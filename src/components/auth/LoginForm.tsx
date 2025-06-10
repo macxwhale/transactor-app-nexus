@@ -1,129 +1,17 @@
 
-import React, { useState } from "react";
-import { toast } from "sonner";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { loginFormSchema, sanitizeInput, validateField, emailSchema } from "@/utils/validation";
 
 export const LoginForm = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const { login } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const validateForm = () => {
-    const emailError = validateField(emailSchema, username);
-    const passwordError = password.length === 0 ? 'Password is required' : null;
-    
-    setErrors({
-      email: emailError,
-      password: passwordError,
-    });
+  useEffect(() => {
+    // Redirect to the new auth page
+    navigate("/auth");
+  }, [navigate]);
 
-    return !emailError && !passwordError;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      toast.error("Please fix the errors before submitting");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Sanitize inputs
-    const sanitizedEmail = sanitizeInput(username);
-    const sanitizedPassword = sanitizeInput(password);
-
-    // Simulate network delay
-    setTimeout(() => {
-      const success = login(sanitizedEmail, sanitizedPassword);
-      
-      if (success) {
-        toast.success("Login successful", {
-          description: "Welcome back!",
-        });
-        navigate("/");
-      } else {
-        toast.error("Login failed", {
-          description: "Invalid username or password",
-        });
-      }
-      setIsLoading(false);
-    }, 800);
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setUsername(value);
-    if (errors.email && value) {
-      const emailError = validateField(emailSchema, value);
-      setErrors(prev => ({ ...prev, email: emailError }));
-    }
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPassword(value);
-    if (errors.password && value) {
-      setErrors(prev => ({ ...prev, password: null }));
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="username" className="text-sm font-medium">
-            Email
-          </label>
-          <Input
-            id="username"
-            type="email"
-            placeholder="info@bunisystems.com"
-            value={username}
-            onChange={handleEmailChange}
-            required
-            className={errors.email ? 'border-destructive' : ''}
-          />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email}</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium">
-            Password
-          </label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••••••"
-            value={password}
-            onChange={handlePasswordChange}
-            required
-            className={errors.password ? 'border-destructive' : ''}
-          />
-          {errors.password && (
-            <p className="text-sm text-destructive">{errors.password}</p>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-        >
-          {isLoading ? "Signing in..." : "Sign In"}
-        </Button>
-      </CardFooter>
-    </form>
-  );
+  // Show nothing while redirecting
+  return null;
 };
