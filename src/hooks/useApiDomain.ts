@@ -11,7 +11,10 @@ export const useApiDomain = () => {
   useEffect(() => {
     async function loadApiConfig() {
       setIsLoading(true);
+      setError(null);
+      
       try {
+        console.log("Loading API configuration from database...");
         const { data, error } = await supabase
           .from('api_configurations')
           .select('value')
@@ -24,14 +27,16 @@ export const useApiDomain = () => {
           return;
         }
         
-        if (data) {
+        if (data?.value) {
           const savedDomain = data.value;
+          console.log("API domain loaded from database:", savedDomain);
           setApiDomain(savedDomain);
           
-          // Set the API domain in the client
-          if (savedDomain) {
-            apiClient.setBaseUrl(savedDomain);
-          }
+          // Initialize the API client with the domain
+          apiClient.setBaseUrl(savedDomain);
+        } else {
+          console.log("No API domain found in database");
+          setApiDomain("");
         }
       } catch (error) {
         console.error("Failed to load API configuration:", error);
@@ -44,15 +49,20 @@ export const useApiDomain = () => {
     loadApiConfig();
   }, []);
 
-  const updateApiDomain = (domain: string) => {
+  const updateApiDomain = async (domain: string) => {
+    console.log("Updating API domain:", domain);
     setApiDomain(domain);
+    
+    // Update the API client immediately
+    apiClient.setBaseUrl(domain);
   };
 
   return {
     apiDomain,
     setApiDomain: updateApiDomain,
     isLoading,
-    error
+    error,
+    isConfigured: !!apiDomain
   };
 };
 

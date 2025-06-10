@@ -31,39 +31,39 @@ export async function fetchTransactions(
 export async function queryTransaction(tx: Transaction): Promise<any> {
   try {
     if (!tx.checkout_request_id || !tx.application_id) {
-      toast.error("Missing required transaction information");
+      const errorMsg = "Missing required transaction information (checkout_request_id or application_id)";
+      console.error(errorMsg);
+      toast.error(errorMsg);
       return null;
     }
     
-    // Get API domain from localStorage
-    const apiDomain = localStorage.getItem("apiDomain");
-    if (!apiDomain) {
-      toast.error("API domain not configured");
-      return null;
-    }
+    console.log("Starting transaction query for:", {
+      appId: tx.application_id,
+      checkoutRequestId: tx.checkout_request_id
+    });
     
-    // Log the URL being used - helps with debugging
-    console.log("Using API domain:", apiDomain);
-    apiClient.setBaseUrl(apiDomain);
+    // Use the improved API client with automatic initialization
+    const result = await apiClient.queryTransaction(tx.application_id, tx.checkout_request_id);
+    console.log("Transaction query successful:", result);
+    return result;
     
-    // Since we're likely hitting CORS issues, let's add better error handling
-    try {
-      const result = await apiClient.queryTransaction(tx.application_id, tx.checkout_request_id);
-      console.log("Transaction query successful:", result);
-      return result;
-    } catch (error) {
-      console.error("Error querying transaction:", error);
-      
-      // More user-friendly error message
-      if (error instanceof Error && error.message.includes("CORS")) {
+  } catch (error) {
+    console.error("Error in queryTransaction:", error);
+    
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes("API domain not configured")) {
+        toast.error("API domain not configured. Please configure it in the Configuration page.");
+      } else if (error.message.includes("Failed to authenticate")) {
+        toast.error("Failed to authenticate with the payment server. Please check your application credentials.");
+      } else if (error.message.includes("CORS")) {
         toast.error("Unable to connect to the payment server due to CORS restrictions. Please contact your administrator.");
       } else {
-        toast.error("Failed to query transaction. Please try again later.");
+        toast.error(`Transaction query failed: ${error.message}`);
       }
-      return null;
+    } else {
+      toast.error("Failed to query transaction. Please try again later.");
     }
-  } catch (error) {
-    console.error("Error in queryTransaction outer block:", error);
     return null;
   }
 }
