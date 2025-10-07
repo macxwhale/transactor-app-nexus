@@ -116,7 +116,7 @@ export type Database = {
         }
         Relationships: []
       }
-      c2b_transactions: {
+      b2c_transactions: {
         Row: {
           amount: number
           application_id: string | null
