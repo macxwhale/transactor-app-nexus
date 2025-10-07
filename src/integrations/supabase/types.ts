@@ -116,6 +116,71 @@ export type Database = {
         }
         Relationships: []
       }
+      c2b_transactions: {
+        Row: {
+          amount: number
+          application_id: string | null
+          command_id: string
+          created_at: string | null
+          id: string
+          initiator_name: string
+          occasion: string | null
+          originator_conversation_id: string
+          party_a: string
+          party_b: string
+          raw_callback: Json | null
+          remarks: string | null
+          result_code: number | null
+          result_desc: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          application_id?: string | null
+          command_id: string
+          created_at?: string | null
+          id?: string
+          initiator_name: string
+          occasion?: string | null
+          originator_conversation_id: string
+          party_a: string
+          party_b: string
+          raw_callback?: Json | null
+          remarks?: string | null
+          result_code?: number | null
+          result_desc?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          application_id?: string | null
+          command_id?: string
+          created_at?: string | null
+          id?: string
+          initiator_name?: string
+          occasion?: string | null
+          originator_conversation_id?: string
+          party_a?: string
+          party_b?: string
+          raw_callback?: Json | null
+          remarks?: string | null
+          result_code?: number | null
+          result_desc?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "c2b_transactions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
