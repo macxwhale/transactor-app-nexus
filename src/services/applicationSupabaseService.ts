@@ -38,7 +38,14 @@ export async function fetchApplicationsFromSupabase(): Promise<Application[]> {
       created_at: app.created_at || new Date().toISOString(),
       updated_at: app.updated_at || new Date().toISOString(),
       app_id: app.app_id || '',
-      app_secret: app.app_secret || ''
+      app_secret: app.app_secret || '',
+      originator_conversation_id: app.originator_conversation_id,
+      initiator_name: app.initiator_name,
+      initiator_password: app.initiator_password,
+      security_credential: app.security_credential,
+      command_id: app.command_id as 'SalaryPayment' | 'BusinessPayment' | 'PromotionPayment' | undefined,
+      queue_timeout_url: app.queue_timeout_url,
+      result_url: app.result_url,
     }));
     
     console.log("Formatted applications:", formattedApps);
@@ -106,7 +113,14 @@ export async function updateApplicationInSupabase(id: string, data: ApplicationF
       passkey,
       bearer_token,
       party_a,
-      party_b
+      party_b,
+      originator_conversation_id,
+      initiator_name,
+      initiator_password,
+      security_credential,
+      command_id,
+      queue_timeout_url,
+      result_url
     } = data;
 
     // Check if another app with the same name exists
@@ -131,6 +145,13 @@ export async function updateApplicationInSupabase(id: string, data: ApplicationF
         bearer_token,
         party_a,
         party_b,
+        originator_conversation_id,
+        initiator_name,
+        initiator_password,
+        security_credential,
+        command_id,
+        queue_timeout_url,
+        result_url,
         updated_at: new Date().toISOString()
       })
       .eq('id', id);
