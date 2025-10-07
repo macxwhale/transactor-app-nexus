@@ -19,6 +19,12 @@ const applicationSchema = z.object({
   bearer_token: z.string().min(1, "Bearer token is required"),
   party_a: z.string().min(1, "Party A is required"),
   party_b: z.string().min(1, "Party B is required"),
+  originator_conversation_id: z.string().optional(),
+  initiator_name: z.string().optional(),
+  security_credential: z.string().optional(),
+  command_id: z.enum(['SalaryPayment', 'BusinessPayment', 'PromotionPayment']).optional(),
+  queue_timeout_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  result_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 export type ApplicationFormValues = z.infer<typeof applicationSchema>;
@@ -53,6 +59,12 @@ const ApplicationForm = ({
       bearer_token: "",
       party_a: "",
       party_b: "",
+      originator_conversation_id: "",
+      initiator_name: "",
+      security_credential: "",
+      command_id: undefined,
+      queue_timeout_url: "",
+      result_url: "",
     },
   });
 
@@ -148,6 +160,74 @@ const ApplicationForm = ({
             form={form}
             name="party_b"
             label="Party B"
+            disabled={isSubmitting}
+          />
+        </div>
+
+        {/* Additional M-Pesa Configuration */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormFieldGroup
+            form={form}
+            name="originator_conversation_id"
+            label="Originator Conversation ID"
+            placeholder="Optional"
+            disabled={isSubmitting}
+          />
+          <FormFieldGroup
+            form={form}
+            name="initiator_name"
+            label="Initiator Name"
+            placeholder="Optional"
+            disabled={isSubmitting}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormFieldGroup
+            form={form}
+            name="security_credential"
+            label="Security Credential"
+            placeholder="Optional"
+            disabled={isSubmitting}
+          />
+          <div className="space-y-2">
+            <label htmlFor="command_id" className="text-sm font-medium">
+              Command ID
+            </label>
+            <select
+              id="command_id"
+              {...form.register("command_id")}
+              disabled={isSubmitting}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">Select Command ID</option>
+              <option value="SalaryPayment">Salary Payment</option>
+              <option value="BusinessPayment">Business Payment</option>
+              <option value="PromotionPayment">Promotion Payment</option>
+            </select>
+            {form.formState.errors.command_id && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.command_id.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormFieldGroup
+            form={form}
+            name="queue_timeout_url"
+            label="Queue Timeout URL"
+            placeholder="https://example.com/timeout"
+            description="Optional callback URL for timeout"
+            disabled={isSubmitting}
+          />
+          <FormFieldGroup
+            form={form}
+            name="result_url"
+            label="Result URL"
+            placeholder="https://example.com/result"
+            description="Optional callback URL for results"
             disabled={isSubmitting}
           />
         </div>

@@ -19,6 +19,12 @@ export interface Application {
   updated_at: string;
   app_id: string;
   app_secret: string;
+  originator_conversation_id?: string;
+  initiator_name?: string;
+  security_credential?: string;
+  command_id?: 'SalaryPayment' | 'BusinessPayment' | 'PromotionPayment';
+  queue_timeout_url?: string;
+  result_url?: string;
 }
 
 export interface Transaction {
