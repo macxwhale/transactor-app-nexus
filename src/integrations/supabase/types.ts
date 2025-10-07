@@ -54,6 +54,7 @@ export type Database = {
           created_at: string | null
           id: string
           initiator_name: string | null
+          initiator_password: string | null
           is_active: boolean | null
           name: string
           originator_conversation_id: string | null
@@ -77,6 +78,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           initiator_name?: string | null
+          initiator_password?: string | null
           is_active?: boolean | null
           name: string
           originator_conversation_id?: string | null
@@ -100,6 +102,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           initiator_name?: string | null
+          initiator_password?: string | null
           is_active?: boolean | null
           name?: string
           originator_conversation_id?: string | null

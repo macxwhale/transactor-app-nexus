@@ -21,6 +21,7 @@ const applicationSchema = z.object({
   party_b: z.string().min(1, "Party B is required"),
   originator_conversation_id: z.string().optional(),
   initiator_name: z.string().optional(),
+  initiator_password: z.string().optional(),
   security_credential: z.string().optional(),
   command_id: z.enum(['SalaryPayment', 'BusinessPayment', 'PromotionPayment']).optional(),
   queue_timeout_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
@@ -61,6 +62,7 @@ const ApplicationForm = ({
       party_b: "",
       originator_conversation_id: "",
       initiator_name: "",
+      initiator_password: "",
       security_credential: "",
       command_id: undefined,
       queue_timeout_url: "",
@@ -183,6 +185,13 @@ const ApplicationForm = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormFieldGroup
+            form={form}
+            name="initiator_password"
+            label="Initiator Password"
+            placeholder="Optional"
+            disabled={isSubmitting}
+          />
           <FormFieldGroup
             form={form}
             name="security_credential"

@@ -21,6 +21,7 @@ export interface Application {
   app_secret: string;
   originator_conversation_id?: string;
   initiator_name?: string;
+  initiator_password?: string;
   security_credential?: string;
   command_id?: 'SalaryPayment' | 'BusinessPayment' | 'PromotionPayment';
   queue_timeout_url?: string;
