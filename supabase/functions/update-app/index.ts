@@ -32,7 +32,14 @@ serve(async (req) => {
       passkey,
       bearer_token,
       party_a,
-      party_b 
+      party_b,
+      originator_conversation_id,
+      initiator_name,
+      initiator_password,
+      security_credential,
+      command_id,
+      queue_timeout_url,
+      result_url
     } = data
 
     // Required validation
@@ -113,6 +120,13 @@ serve(async (req) => {
         bearer_token,
         party_a,
         party_b,
+        originator_conversation_id,
+        initiator_name,
+        initiator_password,
+        security_credential,
+        command_id,
+        queue_timeout_url,
+        result_url,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)

@@ -25,8 +25,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     toast.success("Logged out successfully");
     navigate("/login");
   };
@@ -54,8 +54,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     },
   ];
 
-  // Get first letter of username for avatar
-  const userInitial = user?.username ? user.username[0].toUpperCase() : "U";
+  // Get first letter of email for avatar
+  const userInitial = user?.email ? user.email[0].toUpperCase() : "U";
 
   return (
     <div className="min-h-screen flex overflow-hidden bg-muted/30 dark:bg-gray-900">
@@ -82,7 +82,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
             {!isMobile && (
               <div className="text-sm">
-                <p className="font-medium">{user?.username || "User"}</p>
+                <p className="font-medium">{user?.email || "User"}</p>
                 <p className="text-muted-foreground text-xs">Administrator</p>
               </div>
             )}

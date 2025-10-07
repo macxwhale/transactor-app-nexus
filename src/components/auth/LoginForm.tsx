@@ -28,7 +28,7 @@ export const LoginForm = () => {
     return !emailError && !passwordError;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -42,22 +42,19 @@ export const LoginForm = () => {
     const sanitizedEmail = sanitizeInput(username);
     const sanitizedPassword = sanitizeInput(password);
 
-    // Simulate network delay
-    setTimeout(() => {
-      const success = login(sanitizedEmail, sanitizedPassword);
-      
-      if (success) {
-        toast.success("Login successful", {
-          description: "Welcome back!",
-        });
-        navigate("/");
-      } else {
-        toast.error("Login failed", {
-          description: "Invalid username or password",
-        });
-      }
-      setIsLoading(false);
-    }, 800);
+    const { error } = await login(sanitizedEmail, sanitizedPassword);
+    
+    if (!error) {
+      toast.success("Login successful", {
+        description: "Welcome back!",
+      });
+      navigate("/");
+    } else {
+      toast.error("Login failed", {
+        description: error.message || "Invalid email or password",
+      });
+    }
+    setIsLoading(false);
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {

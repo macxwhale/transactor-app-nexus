@@ -1,68 +1,74 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-// Define the types for our auth context
-type User = {
-  username: string;
-};
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 type AuthContextType = {
   user: User | null;
-  login: (username: string, password: string) => boolean;
-  logout: () => void;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<{ error: Error | null }>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 };
 
-// Create the context with a default value
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: () => false,
-  logout: () => {},
+  session: null,
+  login: async () => ({ error: null }),
+  logout: async () => {},
   isAuthenticated: false,
 });
 
-// Create a hook for using the auth context
 export const useAuth = () => useContext(AuthContext);
 
-// Create the auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  
-  // Check for saved auth on mount
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const savedUser = localStorage.getItem('auth_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Hard-coded credentials
-  const validCredentials = {
-    username: 'info@bunisystems.com',
-    password: 'bunisystems.com'
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { error };
   };
 
-  const login = (username: string, password: string): boolean => {
-    if (username === validCredentials.username && password === validCredentials.password) {
-      const user = { username };
-      setUser(user);
-      localStorage.setItem('auth_user', JSON.stringify(user));
-      return true;
-    }
-    return false;
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('auth_user');
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   const value = {
     user,
+    session,
     login,
     logout,
     isAuthenticated: !!user,
   };
+
+  if (loading) {
+    return null; // Or a loading spinner
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
