@@ -28,7 +28,7 @@ const EditApplicationDialog = ({
 
   return (
     <Dialog open={!!editingApp} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Edit Application</DialogTitle>
           <DialogDescription>
@@ -38,16 +38,18 @@ const EditApplicationDialog = ({
             )}
           </DialogDescription>
         </DialogHeader>
-        <ApplicationForm 
-          onSubmit={onSubmit}
-          defaultValues={editingApp}
-          isEditing
-          isSubmitting={isSubmitting}
-          appCredentials={{
-            app_id: editingApp.app_id,
-            app_secret: editingApp.app_secret
-          }}
-        />
+        <div className="overflow-y-auto flex-1 pr-2">
+          <ApplicationForm 
+            onSubmit={onSubmit}
+            defaultValues={editingApp}
+            isEditing
+            isSubmitting={isSubmitting}
+            appCredentials={{
+              app_id: editingApp.app_id,
+              app_secret: editingApp.app_secret
+            }}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

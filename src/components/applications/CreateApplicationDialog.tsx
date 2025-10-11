@@ -38,7 +38,7 @@ const CreateApplicationDialog = ({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Register New Application</DialogTitle>
           <DialogDescription>
@@ -50,10 +50,12 @@ const CreateApplicationDialog = ({
             )}
           </DialogDescription>
         </DialogHeader>
-        <ApplicationForm 
-          onSubmit={onSubmit} 
-          isSubmitting={isSubmitting}
-        />
+        <div className="overflow-y-auto flex-1 pr-2">
+          <ApplicationForm 
+            onSubmit={onSubmit} 
+            isSubmitting={isSubmitting}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
