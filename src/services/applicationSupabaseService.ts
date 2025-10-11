@@ -47,6 +47,7 @@ export async function fetchApplicationsFromSupabase(): Promise<Application[]> {
       queue_timeout_url: app.queue_timeout_url,
       result_url: app.result_url,
       transaction_type: app.transaction_type as 'CustomerBuyGoodsOnline' | 'CustomerPayBillOnline',
+      environment: app.environment as 'Production' | 'Development',
     }));
     
     console.log("Formatted applications:", formattedApps);
@@ -122,7 +123,8 @@ export async function updateApplicationInSupabase(id: string, data: ApplicationF
       command_id,
       queue_timeout_url,
       result_url,
-      transaction_type
+      transaction_type,
+      environment
     } = data;
 
     // Check if another app with the same name exists
@@ -155,6 +157,7 @@ export async function updateApplicationInSupabase(id: string, data: ApplicationF
         queue_timeout_url,
         result_url,
         transaction_type,
+        environment,
         updated_at: new Date().toISOString()
       })
       .eq('id', id);

@@ -52,6 +52,7 @@ export type Database = {
           consumer_key: string
           consumer_secret: string
           created_at: string | null
+          environment: string
           id: string
           initiator_name: string | null
           initiator_password: string | null
@@ -77,6 +78,7 @@ export type Database = {
           consumer_key: string
           consumer_secret: string
           created_at?: string | null
+          environment?: string
           id?: string
           initiator_name?: string | null
           initiator_password?: string | null
@@ -102,6 +104,7 @@ export type Database = {
           consumer_key?: string
           consumer_secret?: string
           created_at?: string | null
+          environment?: string
           id?: string
           initiator_name?: string | null
           initiator_password?: string | null

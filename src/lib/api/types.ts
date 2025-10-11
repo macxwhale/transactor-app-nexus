@@ -27,6 +27,7 @@ export interface Application {
   queue_timeout_url?: string;
   result_url?: string;
   transaction_type: 'CustomerBuyGoodsOnline' | 'CustomerPayBillOnline';
+  environment: 'Production' | 'Development';
 }
 
 export interface Transaction {

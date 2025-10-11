@@ -27,6 +27,7 @@ const applicationSchema = z.object({
   queue_timeout_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   result_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   transaction_type: z.enum(['CustomerBuyGoodsOnline', 'CustomerPayBillOnline']),
+  environment: z.enum(['Production', 'Development']),
 });
 
 export type ApplicationFormValues = z.infer<typeof applicationSchema>;
@@ -69,6 +70,7 @@ const ApplicationForm = ({
       queue_timeout_url: "",
       result_url: "",
       transaction_type: "CustomerPayBillOnline",
+      environment: "Production",
     },
   });
 
@@ -116,6 +118,25 @@ const ApplicationForm = ({
             {form.formState.errors.transaction_type && (
               <p className="text-sm text-destructive">
                 {form.formState.errors.transaction_type.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="environment" className="text-sm font-medium">
+              Environment
+            </label>
+            <select
+              id="environment"
+              {...form.register("environment")}
+              disabled={isSubmitting}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="Production">Production</option>
+              <option value="Development">Development</option>
+            </select>
+            {form.formState.errors.environment && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.environment.message}
               </p>
             )}
           </div>

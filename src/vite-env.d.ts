@@ -18,4 +18,5 @@ interface Application {
   app_id: string;
   app_secret: string;
   transaction_type: 'CustomerBuyGoodsOnline' | 'CustomerPayBillOnline';
+  environment: 'Production' | 'Development';
 }

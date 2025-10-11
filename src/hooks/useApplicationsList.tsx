@@ -39,7 +39,8 @@ export function useApplicationsList() {
         updated_at: '',
         app_id: app.app_id || '',
         app_secret: app.app_secret || '',
-        transaction_type: 'CustomerPayBillOnline'
+        transaction_type: 'CustomerPayBillOnline',
+        environment: 'Production'
       }));
       
       setApplications(formattedApps);
