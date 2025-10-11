@@ -1,6 +1,9 @@
-
 import { ApplicationFormValues } from "@/components/applications/ApplicationForm";
 import { apiClient, createApplication, updateApplication } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
+
+const SUPABASE_URL = "https://yviivxtgzmethbbtzwbv.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2aWl2eHRnem1ldGhiYnR6d2J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwNzQ5MzYsImV4cCI6MjA2MjY1MDkzNn0.5ha_Mo9Yz1LOkVLvQmcyJEqHHfRycI-Pub30SEDMIQE";
 
 // Update return types to be consistent across all functions
 export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any }> {
@@ -25,10 +28,16 @@ export async function registerAppWithAPI(data: ApplicationFormValues): Promise<{
 export async function registerAppWithEdgeFunction(data: ApplicationFormValues): Promise<{ success: boolean; apiResponse?: any }> {
   try {
     console.log("Attempting to register with Edge Function");
-    const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/register-app', {
+    
+    // Get the current session for authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/register-app`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_ANON_KEY,
       },
       body: JSON.stringify(data)
     });
@@ -71,9 +80,17 @@ export async function updateAppWithAPI(id: string, data: ApplicationFormValues):
 export async function updateAppWithEdgeFunction(id: string, data: ApplicationFormValues): Promise<{ success: boolean }> {
   try {
     console.log("Attempting to update with Edge Function", { id, ...data });
-    const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/update-app', {
+    
+    // Get the current session for authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/update-app`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_ANON_KEY,
+      },
       body: JSON.stringify({ id, ...data })
     });
     
@@ -95,9 +112,16 @@ export async function updateAppWithEdgeFunction(id: string, data: ApplicationFor
 
 export async function toggleStatusWithEdgeFunction(id: string, isActive: boolean): Promise<{ success: boolean }> {
   try {
-    const response = await fetch('https://yviivxtgzmethbbtzwbv.supabase.co/functions/v1/toggle-app-status', {
+    // Get the current session for authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/toggle-app-status`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_ANON_KEY,
+      },
       body: JSON.stringify({ id, is_active: isActive })
     });
     
