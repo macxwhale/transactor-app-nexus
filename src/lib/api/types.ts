@@ -26,6 +26,7 @@ export interface Application {
   command_id?: 'SalaryPayment' | 'BusinessPayment' | 'PromotionPayment';
   queue_timeout_url?: string;
   result_url?: string;
+  transaction_type: 'CustomerBuyGoodsOnline' | 'CustomerPayBillOnline';
 }
 
 export interface Transaction {

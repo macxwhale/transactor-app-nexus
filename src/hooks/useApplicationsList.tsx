@@ -38,7 +38,8 @@ export function useApplicationsList() {
         created_at: '',
         updated_at: '',
         app_id: app.app_id || '',
-        app_secret: app.app_secret || ''
+        app_secret: app.app_secret || '',
+        transaction_type: 'CustomerPayBillOnline'
       }));
       
       setApplications(formattedApps);

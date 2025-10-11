@@ -17,4 +17,5 @@ interface Application {
   updated_at: string;
   app_id: string;
   app_secret: string;
+  transaction_type: 'CustomerBuyGoodsOnline' | 'CustomerPayBillOnline';
 }

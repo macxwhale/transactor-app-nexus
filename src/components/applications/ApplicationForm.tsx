@@ -26,6 +26,7 @@ const applicationSchema = z.object({
   command_id: z.enum(['SalaryPayment', 'BusinessPayment', 'PromotionPayment']).optional(),
   queue_timeout_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   result_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  transaction_type: z.enum(['CustomerBuyGoodsOnline', 'CustomerPayBillOnline']),
 });
 
 export type ApplicationFormValues = z.infer<typeof applicationSchema>;
@@ -67,6 +68,7 @@ const ApplicationForm = ({
       command_id: undefined,
       queue_timeout_url: "",
       result_url: "",
+      transaction_type: "CustomerPayBillOnline",
     },
   });
 
@@ -98,6 +100,25 @@ const ApplicationForm = ({
             description="Must start with https://"
             disabled={isSubmitting}
           />
+          <div className="space-y-2">
+            <label htmlFor="transaction_type" className="text-sm font-medium">
+              Transaction Type
+            </label>
+            <select
+              id="transaction_type"
+              {...form.register("transaction_type")}
+              disabled={isSubmitting}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="CustomerPayBillOnline">Customer Pay Bill Online</option>
+              <option value="CustomerBuyGoodsOnline">Customer Buy Goods Online</option>
+            </select>
+            {form.formState.errors.transaction_type && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.transaction_type.message}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* App credentials section - only shown when editing */}

@@ -64,6 +64,7 @@ export type Database = {
           queue_timeout_url: string | null
           result_url: string | null
           security_credential: string | null
+          transaction_type: string
           updated_at: string | null
         }
         Insert: {
@@ -88,6 +89,7 @@ export type Database = {
           queue_timeout_url?: string | null
           result_url?: string | null
           security_credential?: string | null
+          transaction_type?: string
           updated_at?: string | null
         }
         Update: {
@@ -112,6 +114,7 @@ export type Database = {
           queue_timeout_url?: string | null
           result_url?: string | null
           security_credential?: string | null
+          transaction_type?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -119,8 +122,9 @@ export type Database = {
       b2c_transactions: {
         Row: {
           amount: number
-          application_id: string | null
+          app_id: string | null
           command_id: string
+          conversation_id: string | null
           created_at: string | null
           id: string
           initiator_name: string
@@ -137,8 +141,9 @@ export type Database = {
         }
         Insert: {
           amount: number
-          application_id?: string | null
+          app_id?: string | null
           command_id: string
+          conversation_id?: string | null
           created_at?: string | null
           id?: string
           initiator_name: string
@@ -155,8 +160,9 @@ export type Database = {
         }
         Update: {
           amount?: number
-          application_id?: string | null
+          app_id?: string | null
           command_id?: string
+          conversation_id?: string | null
           created_at?: string | null
           id?: string
           initiator_name?: string
@@ -171,15 +177,7 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "c2b_transactions_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
