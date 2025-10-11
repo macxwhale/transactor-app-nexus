@@ -7,7 +7,9 @@ import {
   LayoutDashboard,
   Settings,
   Bell,
-  LogOut
+  LogOut,
+  ArrowDownToLine,
+  ArrowUpFromLine
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -43,9 +45,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       href: "/applications",
     },
     {
-      icon: BarChart3,
-      label: "Transactions",
+      icon: ArrowDownToLine,
+      label: "C2B Transactions",
       href: "/transactions",
+    },
+    {
+      icon: ArrowUpFromLine,
+      label: "B2C Transactions",
+      href: "/b2c-transactions",
     },
     {
       icon: Settings,

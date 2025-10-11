@@ -10,6 +10,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import Applications from "@/pages/Applications";
 import Transactions from "@/pages/Transactions";
+import B2CTransactions from "@/pages/B2CTransactions";
 import Configuration from "@/pages/Configuration";
 import Login from "@/pages/Login";
 import NotFound from "./pages/NotFound";
@@ -73,7 +74,17 @@ const AppContent = () => {
             } 
           />
           <Route 
-            path="/config" 
+            path="/b2c-transactions" 
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <B2CTransactions />
+                </AppLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/config"
             element={
               <ProtectedRoute>
                 <AppLayout>
