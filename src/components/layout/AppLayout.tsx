@@ -44,11 +44,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     },
     {
       icon: BarChart3,
-      label: "C2B Transactions",
-      href: "/c2b-transactions",
-    },
-    {
-      icon: BarChart3,
       label: "Transactions",
       href: "/transactions",
     },

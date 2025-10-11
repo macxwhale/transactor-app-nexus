@@ -10,7 +10,6 @@ import AppLayout from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import Applications from "@/pages/Applications";
 import Transactions from "@/pages/Transactions";
-import C2BTransactions from "@/pages/C2BTransactions";
 import Configuration from "@/pages/Configuration";
 import Login from "@/pages/Login";
 import NotFound from "./pages/NotFound";
@@ -64,16 +63,6 @@ const AppContent = () => {
             } 
           />
           <Route 
-            path="/c2b-transactions" 
-            element={
-              <ProtectedRoute>
-                <AppLayout>
-                  <C2BTransactions />
-                </AppLayout>
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
             path="/transactions" 
             element={
               <ProtectedRoute>
@@ -84,7 +73,7 @@ const AppContent = () => {
             } 
           />
           <Route 
-            path="/config"
+            path="/config" 
             element={
               <ProtectedRoute>
                 <AppLayout>
