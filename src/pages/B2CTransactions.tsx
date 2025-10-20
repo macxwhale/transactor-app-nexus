@@ -17,12 +17,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, RefreshCw } from "lucide-react";
+import { Search, RefreshCw, Eye } from "lucide-react";
 import { useB2CTransactions } from "@/hooks/useB2CTransactions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { B2CTransactionDetailsDialog } from "@/components/transactions/B2CTransactionDetailsDialog";
+import { useState } from "react";
 
 const B2CTransactions = () => {
+  const [selectedTx, setSelectedTx] = useState<any>(null);
   const {
     transactions,
     isLoading,
@@ -97,6 +100,7 @@ const B2CTransactions = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Command ID</TableHead>
                 <TableHead>Result</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -109,17 +113,18 @@ const B2CTransactions = () => {
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                   </TableRow>
                 ))
               ) : transactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No B2C transactions found
                   </TableCell>
                 </TableRow>
               ) : (
                 transactions.map((tx) => (
-                  <TableRow key={tx.id}>
+                  <TableRow key={tx.id} className="hover:bg-muted/50">
                     <TableCell>
                       {format(new Date(tx.created_at), "MMM dd, yyyy HH:mm")}
                     </TableCell>
@@ -135,6 +140,17 @@ const B2CTransactions = () => {
                     <TableCell>{tx.command_id}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {tx.result_desc || '-'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedTx(tx)}
+                        className="gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -169,6 +185,12 @@ const B2CTransactions = () => {
           </div>
         )}
       </Card>
+
+      <B2CTransactionDetailsDialog
+        transaction={selectedTx}
+        open={!!selectedTx}
+        onOpenChange={(open) => !open && setSelectedTx(null)}
+      />
     </div>
   );
 };
