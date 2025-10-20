@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeStatus } from "@/utils/transactionUtils";
 import { safeToISOString } from "@/utils/dateUtils";
+import { type TimeRange, getDateRangeFromTimeRange, calculateTrend } from "@/utils/timeRangeUtils";
 
 interface DashboardStats {
   totalTransactions: number;
@@ -13,22 +14,40 @@ interface DashboardStats {
   dailyStats: Array<{ date: string; count: number; amount: number }>;
   topApplications: Array<{ name: string; transactions: number; amount: number }>;
   recentTransactions: any[];
+  trends: {
+    transactions: { value: number; positive: boolean };
+    amount: { value: number; positive: boolean };
+    completed: { value: number; positive: boolean };
+    pending: { value: number; positive: boolean };
+    failed: { value: number; positive: boolean };
+  };
 }
 
-export function useDashboardStats() {
+export function useDashboardStats(timeRange: TimeRange = 'This Week') {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchStats = useCallback(async () => {
-    console.log("Fetching dashboard stats...");
+    console.log(`Fetching dashboard stats for: ${timeRange}`);
     setIsLoading(true);
 
     try {
-      // Fetch transactions data
+      const dateRange = getDateRangeFromTimeRange(timeRange);
+      
+      // Fetch current period transactions
       const { data: transactions, error: txError } = await supabase
         .from('transactions')
         .select('*')
+        .gte('created_at', dateRange.startDate.toISOString())
+        .lte('created_at', dateRange.endDate.toISOString())
         .order('created_at', { ascending: false });
+      
+      // Fetch previous period transactions for comparison
+      const { data: previousTransactions } = await supabase
+        .from('transactions')
+        .select('*')
+        .gte('created_at', dateRange.previousStartDate.toISOString())
+        .lte('created_at', dateRange.previousEndDate.toISOString());
 
       if (txError) {
         console.error("Error fetching transactions:", txError);
@@ -42,6 +61,19 @@ export function useDashboardStats() {
 
       console.log(`Fetched ${transactions?.length || 0} transactions and ${applications?.length || 0} applications`);
 
+      // Calculate previous period stats
+      const prevTotalTransactions = previousTransactions?.length || 0;
+      const prevTotalAmount = previousTransactions?.reduce((sum, tx) => sum + Number(tx.amount || 0), 0) || 0;
+      const prevStatusCounts = (previousTransactions || []).reduce((acc, tx) => {
+        const status = normalizeStatus(tx.status);
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const prevCompletedTransactions = prevStatusCounts['completed'] || 0;
+      const prevPendingTransactions = prevStatusCounts['pending'] || 0;
+      const prevFailedTransactions = prevStatusCounts['failed'] || 0;
+
       if (!transactions || transactions.length === 0) {
         console.log("No transactions found, setting empty stats");
         setStats({
@@ -52,7 +84,14 @@ export function useDashboardStats() {
           failedTransactions: 0,
           dailyStats: [],
           topApplications: [],
-          recentTransactions: []
+          recentTransactions: [],
+          trends: {
+            transactions: { value: 0, positive: false },
+            amount: { value: 0, positive: false },
+            completed: { value: 0, positive: false },
+            pending: { value: 0, positive: false },
+            failed: { value: 0, positive: false }
+          }
         });
         return;
       }
@@ -127,7 +166,14 @@ export function useDashboardStats() {
         failedTransactions,
         dailyStats,
         topApplications,
-        recentTransactions
+        recentTransactions,
+        trends: {
+          transactions: calculateTrend(totalTransactions, prevTotalTransactions),
+          amount: calculateTrend(totalAmount, prevTotalAmount),
+          completed: calculateTrend(completedTransactions, prevCompletedTransactions),
+          pending: calculateTrend(pendingTransactions, prevPendingTransactions),
+          failed: calculateTrend(failedTransactions, prevFailedTransactions)
+        }
       };
 
       console.log("Dashboard stats calculated:", newStats);
@@ -144,12 +190,19 @@ export function useDashboardStats() {
         failedTransactions: 0,
         dailyStats: [],
         topApplications: [],
-        recentTransactions: []
+        recentTransactions: [],
+        trends: {
+          transactions: { value: 0, positive: false },
+          amount: { value: 0, positive: false },
+          completed: { value: 0, positive: false },
+          pending: { value: 0, positive: false },
+          failed: { value: 0, positive: false }
+        }
       });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [timeRange]);
 
   useEffect(() => {
     fetchStats();

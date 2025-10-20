@@ -3,12 +3,14 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import { TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ChartProps {
   dailyStats: Array<{ date: string; count: number; amount: number }>;
 }
 
 export const DailyTransactionsChart = ({ dailyStats }: ChartProps) => {
+  const navigate = useNavigate();
   const totalTransactions = dailyStats.reduce((sum, day) => sum + day.count, 0);
   const avgTransactions = (totalTransactions / dailyStats.length).toFixed(0);
   
@@ -122,6 +124,12 @@ export const DailyTransactionsChart = ({ dailyStats }: ChartProps) => {
               strokeWidth={2.5}
               fill="url(#colorCount)"
               animationDuration={1000}
+              cursor="pointer"
+              onClick={(data: any) => {
+                if (data && data.date) {
+                  navigate(`/transactions?date=${data.date}`);
+                }
+              }}
             />
             <Area 
               yAxisId="right"
@@ -132,6 +140,12 @@ export const DailyTransactionsChart = ({ dailyStats }: ChartProps) => {
               strokeWidth={2.5}
               fill="url(#colorAmount)"
               animationDuration={1000}
+              cursor="pointer"
+              onClick={(data: any) => {
+                if (data && data.date) {
+                  navigate(`/transactions?date=${data.date}`);
+                }
+              }}
             />
           </AreaChart>
         </ResponsiveContainer>

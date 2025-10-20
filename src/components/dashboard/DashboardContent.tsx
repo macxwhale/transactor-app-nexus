@@ -17,6 +17,13 @@ interface DashboardContentProps {
     dailyStats: Array<{ date: string; count: number; amount: number }>;
     topApplications: Array<{ name: string; transactions: number; amount: number }>;
     recentTransactions: any[];
+    trends: {
+      transactions: { value: number; positive: boolean };
+      amount: { value: number; positive: boolean };
+      completed: { value: number; positive: boolean };
+      pending: { value: number; positive: boolean };
+      failed: { value: number; positive: boolean };
+    };
   };
 }
 

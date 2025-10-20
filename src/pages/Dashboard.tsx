@@ -18,9 +18,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Dashboard = () => {
-  const { stats, isLoading, fetchStats } = useDashboardStats();
+  const [timeRange, setTimeRange] = React.useState<"Today" | "This Week" | "This Month" | "Last 3 Months" | "This Year">("This Week");
+  const { stats, isLoading, fetchStats } = useDashboardStats(timeRange);
   const { debounce } = usePerformanceOptimization();
-  const [timeRange, setTimeRange] = React.useState("This Week");
 
   const timeRanges = [
     "Today",
@@ -67,7 +67,7 @@ const Dashboard = () => {
                 {timeRanges.map((range) => (
                   <DropdownMenuItem 
                     key={range} 
-                    onClick={() => setTimeRange(range)}
+                    onClick={() => setTimeRange(range as typeof timeRange)}
                     role="menuitem"
                     aria-selected={timeRange === range}
                   >

@@ -11,6 +11,13 @@ interface DashboardStatsProps {
     completedTransactions: number;
     pendingTransactions: number;
     failedTransactions?: number;
+    trends: {
+      transactions: { value: number; positive: boolean };
+      amount: { value: number; positive: boolean };
+      completed: { value: number; positive: boolean };
+      pending: { value: number; positive: boolean };
+      failed: { value: number; positive: boolean };
+    };
   };
 }
 
@@ -19,44 +26,35 @@ export const DashboardStats = ({ stats }: DashboardStatsProps) => {
   const pendingRate = ((stats.pendingTransactions / stats.totalTransactions) * 100 || 0).toFixed(1);
   const failedRate = ((stats.failedTransactions || 0) / stats.totalTransactions * 100 || 0).toFixed(1);
   
-  // Calculate some trends for visual interest
-  const fakeTrends = {
-    transactions: { value: 12.4, positive: true },
-    amount: { value: 8.7, positive: true },
-    completed: { value: 5.3, positive: true },
-    pending: { value: 3.2, positive: false },
-    failed: { value: 1.5, positive: false }
-  };
-  
   return (
     <div className="dashboard-grid">
       <StatsCard
         title="Total Transactions"
         value={stats.totalTransactions.toLocaleString()}
         icon={<BarChart3 className="h-5 w-5" />}
-        description="All time transactions"
-        trend={fakeTrends.transactions}
+        description="vs previous period"
+        trend={stats.trends.transactions}
       />
       <StatsCard
         title="Total Amount"
         value={formatCurrency(stats.totalAmount)}
         icon={<DollarSign className="h-5 w-5" />}
-        description="Total money transacted"
-        trend={fakeTrends.amount}
+        description="vs previous period"
+        trend={stats.trends.amount}
       />
       <StatsCard
         title="Completed"
         value={stats.completedTransactions.toLocaleString()}
         icon={<CheckCircle className="h-5 w-5" />}
         description={`${successRate}% success rate`}
-        trend={fakeTrends.completed}
+        trend={stats.trends.completed}
       />
       <StatsCard
         title="Pending"
         value={stats.pendingTransactions.toLocaleString()}
         icon={<Clock className="h-5 w-5" />}
         description={`${pendingRate}% of all transactions`}
-        trend={fakeTrends.pending}
+        trend={stats.trends.pending}
         className="border-l-warning"
       />
       {stats.failedTransactions !== undefined && (
@@ -65,7 +63,7 @@ export const DashboardStats = ({ stats }: DashboardStatsProps) => {
           value={(stats.failedTransactions || 0).toLocaleString()}
           icon={<AlertCircle className="h-5 w-5" />}
           description={`${failedRate}% failure rate`}
-          trend={fakeTrends.failed}
+          trend={stats.trends.failed}
           className="border-l-destructive"
         />
       )}
