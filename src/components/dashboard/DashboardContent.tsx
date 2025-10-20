@@ -22,38 +22,37 @@ interface DashboardContentProps {
 
 export const DashboardContent = ({ stats }: DashboardContentProps) => {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="animate-fade-in">
+      <section className="animate-fade-in" aria-label="Key metrics">
         <DashboardStats stats={stats} />
-      </div>
+      </section>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Daily Transaction Chart */}
-        <div className="lg:col-span-2 bg-card rounded-lg shadow-card overflow-hidden border border-border/40">
+      {/* Charts Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6" aria-label="Analytics charts">
+        {/* Daily Transaction Chart - Takes 2/3 width */}
+        <div className="lg:col-span-2 bg-card rounded-xl shadow-card overflow-hidden border border-border/40 hover-lift transition-all">
           <DailyTransactionsChart dailyStats={stats.dailyStats} />
         </div>
 
-        {/* Status Distribution */}
-        <div className="bg-card rounded-lg shadow-card overflow-hidden border border-border/40">
+        {/* Status Distribution - Takes 1/3 width */}
+        <div className="bg-card rounded-xl shadow-card overflow-hidden border border-border/40 hover-lift transition-all">
           <StatusDistributionChart stats={stats} />
         </div>
-      </div>
+      </section>
 
-      <Separator />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Applications and Transactions */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6" aria-label="Detailed insights">
         {/* Top Applications */}
-        <div className="bg-card rounded-lg shadow-card overflow-hidden border border-border/40">
+        <div className="bg-card rounded-xl shadow-card overflow-hidden border border-border/40 hover-lift transition-all">
           <TopApplications topApplications={stats.topApplications} />
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-card rounded-lg shadow-card overflow-hidden border border-border/40">
+        <div className="bg-card rounded-xl shadow-card overflow-hidden border border-border/40 hover-lift transition-all">
           <RecentTransactions recentTransactions={stats.recentTransactions} />
         </div>
-      </div>
+      </section>
     </div>
   );
 };

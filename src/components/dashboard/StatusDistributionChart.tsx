@@ -1,7 +1,8 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { CheckCircle, Clock, XCircle } from "lucide-react";
 
 interface StatusDistributionProps {
   stats: {
@@ -13,49 +14,99 @@ interface StatusDistributionProps {
 }
 
 export const StatusDistributionChart = ({ stats }: StatusDistributionProps) => {
-  // Colors for the pie chart
-  const COLORS = ["#17c964", "#f5a524", "#f31260"];
-
   // Status data for pie chart
   const statusData = [
-    { name: "Completed", value: stats.completedTransactions },
-    { name: "Pending", value: stats.pendingTransactions },
-    { name: "Failed", value: stats.failedTransactions },
+    { 
+      name: "Completed", 
+      value: stats.completedTransactions,
+      color: "hsl(var(--success))",
+      icon: CheckCircle,
+      percentage: ((stats.completedTransactions / stats.totalTransactions) * 100).toFixed(1)
+    },
+    { 
+      name: "Pending", 
+      value: stats.pendingTransactions,
+      color: "hsl(var(--warning))",
+      icon: Clock,
+      percentage: ((stats.pendingTransactions / stats.totalTransactions) * 100).toFixed(1)
+    },
+    { 
+      name: "Failed", 
+      value: stats.failedTransactions,
+      color: "hsl(var(--destructive))",
+      icon: XCircle,
+      percentage: ((stats.failedTransactions / stats.totalTransactions) * 100).toFixed(1)
+    },
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Transaction Status</CardTitle>
+    <Card className="border-0 shadow-none">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-semibold">Status Distribution</CardTitle>
+        <CardDescription className="mt-1">
+          Transaction outcomes breakdown
+        </CardDescription>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[320px]">
         {stats.totalTransactions > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={statusData}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              >
-                {statusData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={COLORS[index % COLORS.length]} 
-                  />
-                ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value: any) => [`${value} transactions`]}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="h-full flex flex-col">
+            <ResponsiveContainer width="100%" height="70%">
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  paddingAngle={2}
+                  dataKey="value"
+                  animationBegin={0}
+                  animationDuration={800}
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.color}
+                      stroke={entry.color}
+                      strokeWidth={0}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  content={({ active, payload }) => {
+                    if (!active || !payload || !payload.length) return null;
+                    const data = payload[0].payload;
+                    return (
+                      <div className="rounded-lg border bg-card p-3 shadow-lg">
+                        <p className="text-sm font-medium mb-1">{data.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {data.value.toLocaleString()} transactions ({data.percentage}%)
+                        </p>
+                      </div>
+                    );
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            
+            {/* Legend with icons */}
+            <div className="grid grid-cols-1 gap-2 mt-2">
+              {statusData.map((item, index) => (
+                <div key={index} className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="text-xs font-medium">{item.name}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground font-medium">
+                    {item.percentage}%
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground">No transaction data available</p>
+            <p className="text-sm text-muted-foreground">No transaction data available</p>
           </div>
         )}
       </CardContent>
